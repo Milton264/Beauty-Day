@@ -1,0 +1,5 @@
+node_modules/
+worker/.dev.vars
+worker/.env
+worker/.deploy-secrets.json
+.DS_Store
