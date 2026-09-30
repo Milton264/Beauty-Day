@@ -1,0 +1,636 @@
+{
+  "version": 1,
+  "brand": {
+    "name": "Beauty Day",
+    "eyebrow": "SPA & PELUQUERÍA",
+    "heroTitle": "El arte de dedicarte tiempo.",
+    "heroSubtitle": "Uñas, cabello, mirada y bienestar en un solo lugar.",
+    "heroImage": "assets/img/salon-referencia.webp",
+    "heroImageIsReference": true
+  },
+  "contact": {
+    "whatsapp": "573242889865",
+    "phone": "324 288 9865",
+    "address": "",
+    "mapsUrl": "",
+    "instagramUrl": "",
+    "email": "",
+    "hours": "Lunes a sábado · 8:00 a. m. – 7:00 p. m."
+  },
+  "categories": [
+    "Uñas",
+    "Pestañas y cejas",
+    "Facial y maquillaje",
+    "Cabello",
+    "Spa y bienestar"
+  ],
+  "services": [
+    {
+      "id": "s01",
+      "name": "Semipermanente",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 55000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": true
+    },
+    {
+      "id": "s02",
+      "name": "Base Ruber",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 75000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s03",
+      "name": "Dipping",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 70000,
+      "pricePrefix": "",
+      "duration": 90,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s04",
+      "name": "Acrílicas",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 130000,
+      "pricePrefix": "Desde ",
+      "duration": 120,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s05",
+      "name": "Mantenimiento acrílico",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 100000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s06",
+      "name": "Press on",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 100000,
+      "pricePrefix": "",
+      "duration": 120,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s07",
+      "name": "Baño acrílico",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 80000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s08",
+      "name": "Manicure",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 25000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s09",
+      "name": "Manicure caballero",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 20000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s10",
+      "name": "Pedicure",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 30000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s11",
+      "name": "Pedicure limpieza",
+      "category": "Uñas",
+      "description": "Un detalle cuidado para tus manos o pies, con el acabado que prefieras.",
+      "price": 25000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/manos-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s12",
+      "name": "Jelly spa",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 70000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": true
+    },
+    {
+      "id": "s13",
+      "name": "Hidratación en parafina",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 25000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s14",
+      "name": "Pestañas efecto húmedo",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 90000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s15",
+      "name": "Pestañas 4D pelo a pelo",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 120000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s16",
+      "name": "Pestañas 2D pelo a pelo",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 120000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s17",
+      "name": "Retoque de pestañas",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 40000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s18",
+      "name": "Pestañas pelo a pelo",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 90000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s19",
+      "name": "Pestañas clásicas",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 80000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s20",
+      "name": "Lifting",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 60000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": true
+    },
+    {
+      "id": "s21",
+      "name": "Depilación de cejas",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 15000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s22",
+      "name": "Depilación de bozo",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 10000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s23",
+      "name": "Depilación y henna",
+      "category": "Pestañas y cejas",
+      "description": "Realza tu mirada con un servicio elegido para ti.",
+      "price": 40000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s24",
+      "name": "Depilación pierna completa",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 60000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s25",
+      "name": "Depilación media pierna",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 35000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s26",
+      "name": "Depilación corporal completa",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 150000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s27",
+      "name": "Depilación de axilas",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 20000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s28",
+      "name": "Depilación de barba",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 25000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s29",
+      "name": "Depilación de bikini",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 50000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s30",
+      "name": "Depilación de patilla",
+      "category": "Spa y bienestar",
+      "description": "Un espacio para bajar el ritmo y consentirte.",
+      "price": 15000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s31",
+      "name": "Maquillaje casual",
+      "category": "Facial y maquillaje",
+      "description": "Un acabado que acompaña tu estilo y la ocasión.",
+      "price": 40000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s32",
+      "name": "Maquillaje para eventos",
+      "category": "Facial y maquillaje",
+      "description": "Un acabado que acompaña tu estilo y la ocasión.",
+      "price": 80000,
+      "pricePrefix": "Desde ",
+      "duration": 60,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s33",
+      "name": "Hidratación capilar",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": null,
+      "pricePrefix": "",
+      "duration": 120,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": true
+    },
+    {
+      "id": "s34",
+      "name": "Repolarización capilar",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 120000,
+      "pricePrefix": "Desde ",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s35",
+      "name": "Corte dama",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 25000,
+      "pricePrefix": "",
+      "duration": 20,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": true
+    },
+    {
+      "id": "s36",
+      "name": "Despuntada",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 20000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s37",
+      "name": "Cepillado corto",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 20000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s38",
+      "name": "Cepillado media espalda",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 35000,
+      "pricePrefix": "",
+      "duration": 60,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s39",
+      "name": "Rayitos",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 180000,
+      "pricePrefix": "Desde ",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s40",
+      "name": "Balayage",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 210000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s41",
+      "name": "Keratina corta",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 150000,
+      "pricePrefix": "",
+      "duration": 180,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s42",
+      "name": "Keratina larga",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": null,
+      "pricePrefix": "",
+      "duration": 180,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s43",
+      "name": "Tintura",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 150000,
+      "pricePrefix": "Desde ",
+      "duration": 60,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s44",
+      "name": "Aplicación de tintura",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 100000,
+      "pricePrefix": "",
+      "duration": null,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    },
+    {
+      "id": "s45",
+      "name": "Shampoo",
+      "category": "Cabello",
+      "description": "Dedica tiempo a tu cabello con el cuidado o cambio que buscas.",
+      "price": 10000,
+      "pricePrefix": "",
+      "duration": 20,
+      "image": "assets/img/ritual-referencia.webp",
+      "featured": false
+    }
+  ],
+  "professionals": [
+    {
+      "id": "geraldin",
+      "name": "Geraldin",
+      "role": "Manicurista",
+      "bio": "Especialista del equipo Beauty Day. Consulta sus servicios y solicita tu cita.",
+      "categories": [
+        "Uñas"
+      ],
+      "image": "",
+      "schedule": ""
+    },
+    {
+      "id": "estefany",
+      "name": "Estefany",
+      "role": "Integral / Manicurista",
+      "bio": "Especialista del equipo Beauty Day. Consulta sus servicios y solicita tu cita.",
+      "categories": [
+        "Uñas",
+        "Pestañas y cejas",
+        "Spa y bienestar"
+      ],
+      "image": "",
+      "schedule": ""
+    },
+    {
+      "id": "vakeline",
+      "name": "Vakeline",
+      "role": "Estilista",
+      "bio": "Especialista del equipo Beauty Day. Consulta sus servicios y solicita tu cita.",
+      "categories": [
+        "Cabello"
+      ],
+      "image": "",
+      "schedule": ""
+    },
+    {
+      "id": "leticia",
+      "name": "Leticia",
+      "role": "Manicurista",
+      "bio": "Especialista del equipo Beauty Day. Consulta sus servicios y solicita tu cita.",
+      "categories": [
+        "Uñas"
+      ],
+      "image": "",
+      "schedule": ""
+    }
+  ],
+  "promotions": [
+    {
+      "id": "cumpleanos",
+      "title": "Celebra tu cumpleaños consintiéndote el doble",
+      "tag": "MES DE CUMPLEAÑOS",
+      "description": "Agenda tu servicio favorito y recibe 50% de descuento en el segundo servicio de menor valor.",
+      "terms": "Válido únicamente durante tu mes de cumpleaños, presentando tu documento. No aplica para esmaltados tradicionales.",
+      "active": true,
+      "image": "assets/img/ritual-referencia.webp"
+    },
+    {
+      "id": "bienvenida",
+      "title": "Un momento para tu cabello",
+      "tag": "BIENVENIDA",
+      "description": "10% de descuento en hidratación capilar durante una semana.",
+      "terms": "Consulta al equipo las condiciones y la fecha de inicio del beneficio antes de reservar.",
+      "active": true,
+      "image": "assets/img/manos-referencia.webp"
+    }
+  ],
+  "gifts": [
+    {
+      "id": "g1",
+      "title": "Manicura semipermanente",
+      "description": "Uñas arregladas y esmaltadas por mayor duración."
+    },
+    {
+      "id": "g2",
+      "title": "Pedicure botánico",
+      "description": "Cuidado de tus pies con productos a base de plantas."
+    },
+    {
+      "id": "g3",
+      "title": "Hidratación en parafina",
+      "description": "Un tratamiento para manos suaves y tersas."
+    }
+  ],
+  "combos": [
+    {
+      "id": "c1",
+      "title": "Manos + pies",
+      "description": "Dos momentos de cuidado en una visita."
+    },
+    {
+      "id": "c2",
+      "title": "Semipermanente manos y pies",
+      "description": "Un acabado a juego para completar tu look."
+    },
+    {
+      "id": "c3",
+      "title": "Hidratación capilar + cepillado",
+      "description": "Cuidado y acabado para tu cabello."
+    },
+    {
+      "id": "c4",
+      "title": "Semipermanente manos + Jelly spa",
+      "description": "Detalles y bienestar en una cita."
+    },
+    {
+      "id": "c5",
+      "title": "Semipermanente + hidratación en parafina",
+      "description": "Color y suavidad para tus manos."
+    }
+  ]
+}
