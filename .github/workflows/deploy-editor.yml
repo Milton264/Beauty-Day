@@ -2,6 +2,10 @@ name: Desplegar editor Beauty Day
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - worker/deploy-request.txt
 
 permissions:
   contents: write
