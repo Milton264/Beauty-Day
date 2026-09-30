@@ -21,9 +21,9 @@ En `Milton264/Beauty-Day` abre **Settings → Secrets and variables → Actions 
 
 Guarda la contraseña del panel en un gestor de contraseñas para entregarla a la dueña. No pongas ninguno de estos valores en archivos del repositorio, mensajes ni capturas.
 
-## 3. Ejecutar el despliegue
+## 3. Avisar que los cuatro secretos están listos
 
-En la pestaña **Actions** del repositorio, abre **Desplegar editor Beauty Day**, pulsa **Run workflow** y selecciona `main`. Cuando termine en verde, la acción habrá publicado el Worker y escrito su URL en `docs/admin/config.js`. GitHub Pages publicará ese último cambio. Luego entra a https://milton264.github.io/Beauty-Day/admin/ con la contraseña que elegiste y prueba editar una palabra, guardarla y volver a dejarla como estaba.
+Avísame «listo» sin enviarme los valores. Yo activaré la acción y comprobaré el resultado. Si prefieres ejecutarla tú, en **Actions → Desplegar editor Beauty Day → Run workflow** selecciona `main`. Cuando termine en verde, habrá publicado el Worker y escrito su URL en `docs/admin/config.js`. GitHub Pages publicará ese último cambio. Luego probaré una edición desde https://milton264.github.io/Beauty-Day/admin/ contigo, sin que me compartas la contraseña por chat.
 
 Si el despliegue indica que falta un subdominio `workers.dev`, entra a **Workers & Pages** de tu cuenta de Cloudflare y configura el subdominio de tu cuenta. Después vuelve a ejecutar la acción. Si aparece otro error, comparte el enlace de la ejecución de Actions, sin copiar secretos.
 
