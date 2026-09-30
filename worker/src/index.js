@@ -30,11 +30,12 @@ async function github(env,path,method='GET',body) {
 const short = (v,max=300) => typeof v==='string' && v.length<=max;
 const image = v => v==='' || (typeof v==='string'&&/^assets\/(img|uploads)\/[a-zA-Z0-9._/-]+\.(png|jpe?g|webp)$/.test(v)&&!v.includes('..'));
 function valid(content) {
-  if(!content||content.version!==1||!content.brand||!content.contact)return false;
+  if(!content||content.version!==1||!content.brand||!content.contact||!content.legal)return false;
   const b=content.brand,c=content.contact;
   if(![b.name,b.eyebrow,b.heroTitle,b.heroSubtitle].every(x=>short(x,300))||!image(b.heroImage)||typeof b.heroImageIsReference!=='boolean')return false;
   if(!/^\d{10,15}$/.test(c.whatsapp)||![c.phone,c.address,c.hours,c.email].every(x=>short(x,300)))return false;
   if(![c.mapsUrl,c.instagramUrl].every(x=>x===''||(short(x,500)&&/^https:\/\//.test(x))))return false;
+  if(!short(content.legal.responsibleName,160)||!short(content.legal.privacyEmail,200))return false;
   if(!Array.isArray(content.categories)||content.categories.length>12||!content.categories.every(x=>short(x,60)))return false;
   const arrays=[['services',100],['professionals',30],['promotions',30],['gifts',30],['combos',30]];
   if(!arrays.every(([name,max])=>Array.isArray(content[name])&&content[name].length<=max))return false;
