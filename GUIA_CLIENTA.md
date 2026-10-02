@@ -1,6 +1,6 @@
 # Cómo actualizar Beauty Day
 
-Abre el panel e ingresa tu correo autorizado y contraseña. Cada administrador tiene su propia cuenta. Si recibiste autorización para registrarte, usa **Crear acceso administrativo**, confirma tu correo y luego inicia sesión.
+Abre el panel e ingresa tu correo autorizado y contraseña. Cada administrador tiene su propia cuenta. Si recibiste autorización para registrarte, usa **Crear acceso administrativo**, confirma tu correo y luego inicia sesión. Si el correo sigue pendiente, abre **Confirmar mi correo** para solicitar otro enlace y revisa también el correo no deseado. Autorizar un correo no confirma automáticamente la cuenta.
 
 El panel abre en **Inicio**, con accesos a las tareas frecuentes. En un teléfono, usa el selector **Ir a** para cambiar de sección.
 
