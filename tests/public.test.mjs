@@ -61,6 +61,11 @@ test('el código habilita tarifas y una revocación vuelve a ocultarlas',async()
  assert.match(node('#main').innerHTML,/Cómo ver precios/);
  assert.doesNotMatch(node('#main').innerHTML,/777 COP/);
  assert.equal(saved.has('bd_price_code'),false);
+ location.hash='#/precios';listeners.hashchange();
+ node('#price-code').value='0123456789abcdef0123456789abcdef';
+ await node('#price-access-form').handlers.submit({preventDefault(){},currentTarget:node('#price-access-form')});
+ assert.match(node('#main').innerHTML,/Este acceso venció o fue retirado/);
+ assert.match(node('#main').innerHTML,/<details class="access-fallback" open>/);
 });
 
 async function openPrivateLink({reject=false,token='0123456789abcdef0123456789abcdef'}={}){

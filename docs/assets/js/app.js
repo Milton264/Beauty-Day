@@ -9,6 +9,7 @@
   let site;
   let priceAccess=null,accessTimer,accessCheckTimer,accessOpening=false,accessMessage='',accessRequest=0;
   const backend=window.BeautyData;
+  const accessError=error=>/inválido|venció|disponible/.test(error.message)?'Este acceso venció o fue retirado. Escríbenos por WhatsApp para revisar tu reserva y solicitar otro enlace.':error.message;
   const hasPriceAccess=()=>!!priceAccess&&priceAccess.expiresAt>Date.now();
   const priceText=item=>hasPriceAccess()?((priceAccess.prices.find(p=>p.id===item.id)?.pricePrefix||'')+money(priceAccess.prices.find(p=>p.id===item.id)?.price)):'Precio reservado';
   const priceLabel=item=>hasPriceAccess()?esc(priceText(item)):'<a class="price-lock" href="#/precios">Cómo ver precios</a>';
@@ -36,7 +37,7 @@
       const opened=await unlockPrices(window.BeautyAccess.normalize(incoming),true);if(!opened)return true;
       accessOpening=false;history.replaceState(null,'',location.pathname+location.search+'#/servicios');render();
     }catch(error){
-      accessOpening=false;accessMessage=/inválido|venció|disponible/.test(error.message)?'Este acceso venció o fue retirado. Escríbenos por WhatsApp para revisar tu reserva y solicitar otro enlace.':error.message;render();
+      accessOpening=false;accessMessage=accessError(error);render();
     }
     return true;
   }
@@ -142,7 +143,7 @@
   }
   function bind() {
     $('#lock-prices')?.addEventListener('click',()=>lockPrices());
-    $('#price-access-form')?.addEventListener('submit',async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button'),message=$('#price-access-status');button.disabled=true;message.textContent='Comprobando tu acceso…';try{accessMessage='';await unlockPrices(window.BeautyAccess.normalize($('#price-code').value));}catch(error){const current=$('#price-access-status');if(current)current.textContent=error.message;}finally{if(button.isConnected)button.disabled=false;}});
+    $('#price-access-form')?.addEventListener('submit',async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button'),message=$('#price-access-status');button.disabled=true;message.textContent='Comprobando tu acceso…';try{accessMessage='';await unlockPrices(window.BeautyAccess.normalize($('#price-code').value));}catch(error){accessMessage=accessError(error);render();}finally{if(button.isConnected)button.disabled=false;}});
 
     $('#search-form')?.addEventListener('submit',e=>{e.preventDefault();let q=$('#catalog-search').value.trim();location.hash='#/servicios'+(q?'?q='+encodeURIComponent(q):'');});
     $('#booking-category')?.addEventListener('change',e=>{document.querySelectorAll('.service-option').forEach(o=>o.hidden=!!e.target.value&&o.dataset.category!==e.target.value);});
