@@ -1,54 +1,35 @@
-# Beauty Day · Versión 3
+# Beauty Day
 
-Cambio a palo de rosa y precios reservados. Consulta **ACTIVAR_PRECIOS.md** antes de activar el panel y las tarifas.
+Web pública y panel administrativo con Supabase Auth, Database y Storage. El navegador realiza las peticiones directamente a Supabase; GitHub Pages aloja los archivos de la web. No requiere un servidor propio.
 
-# Beauty Day · Atelier
+Los visitantes pueden consultar el catálogo, solicitar una cita por WhatsApp e ingresar un código para consultar precios. No pueden cambiar el contenido ni consultar las tarifas directamente. Los administradores usan correo y contraseña individuales para editar textos, servicios, categorías, equipo, promociones, bonos, combos, contacto y fotografías; también autorizan otros administradores y generan o revocan códigos.
 
-Web para GitHub Pages y panel de edición de contenido. La parte pública usa HTML, CSS y JavaScript separados. El panel está en `docs/admin/` y guarda cambios mediante una pequeña función externa de Cloudflare.
+## Activación
 
-**Empieza por [GUIA_INSTALACION_WINDOWS.md](GUIA_INSTALACION_WINDOWS.md).** Explica cada clic y comando desde cero. La clienta solo necesitará el enlace y una contraseña; no entra a GitHub ni a Cloudflare.
+Consulta [CONFIGURAR_SUPABASE.md](CONFIGURAR_SUPABASE.md). La configuración pública está en `docs/admin/config.js`; nunca incluyas una clave `service_role` o `sb_secret_`, una contraseña o un token de GitHub. El acceso real se verifica en la base de datos con RLS y funciones SQL.
 
-## En palabras simples
+Las contraseñas se gestionan en Supabase Auth. `beauty_private.admin_emails` solo contiene los correos autorizados; registrar una cuenta por sí solo no concede permisos administrativos.
 
-GitHub Pages muestra la web. Un **Worker** es un programa pequeño que funciona en Cloudflare: comprueba la contraseña del panel y guarda textos y fotos en el repositorio de GitHub. La contraseña y el permiso de escritura de GitHub se guardan allí como secretos, nunca en la página visible.
+## Desarrollo
 
-El visitante puede explorar 45 servicios, equipo, promociones, bonos y combos, y preparar una solicitud de cita. Al final se abre WhatsApp con un mensaje listo para enviar. Beauty Day confirma manualmente la disponibilidad; la web no bloquea horarios.
+Con Node.js 24:
 
-## Qué puede cambiar la dueña
+```sh
+npm ci
+npm run build
+npm test
+```
 
-- Portada, datos de contacto y horarios.
-- Servicios, precios, duración, descripciones y fotos.
-- Profesionales, especialidades, horarios y fotografías.
-- Promociones, bonos y combos.
-- Nombre del responsable de los datos y correo de privacidad.
+Las pruebas ejecutan el esquema y sus permisos en Postgres local con PGlite, que reproduce los campos de Auth y Storage usados aquí. La conexión real, los correos y el inicio de sesión se verifican después de activar el proyecto.
 
-Las fotos grandes se optimizan automáticamente. El panel puede abrirse en el celular.
+`src/data.js` es el adaptador de Supabase; `docs/assets/js/data.js` es el archivo compilado que se publica. El SDK y la herramienta de compilación están fijados en `package-lock.json`.
 
-## Privacidad y textos legales
+- `docs/`: sitio público y panel, publicados desde GitHub Pages.
+- `database/01_schema.sql`: tablas, validación, permisos y operaciones.
+- `database/02_public_seed.sql`: contenido inicial sin importes.
+- `database/03_verify.sql`: comprobación transaccional de permisos y códigos; termina con ROLLBACK.
+- `GUIA_CLIENTA.md`: uso cotidiano del panel.
 
-Incluye páginas de privacidad, cookies y almacenamiento, condiciones de reserva y autorización visible antes de abrir WhatsApp. El código actual no instala analítica ni publicidad. El navegador conserva la solicitud durante la sesión y recuerda que el visitante cerró el aviso informativo. Las tipografías se cargan desde Google Fonts; al pulsar WhatsApp se abre un servicio externo.
+El guardado del contenido y sus precios es una transacción. Una revisión evita sobrescribir cambios de otro administrador. Los códigos duran 24 horas, se almacenan como hashes y se comprueban cada minuto mientras la página está abierta. Las fotografías son públicas; los precios requieren un código vigente. La verificación de seguidores y la confirmación de citas continúan siendo manuales por WhatsApp.
 
-**Antes de publicar**, Beauty Day debe confirmar el nombre real o razón social del responsable, dirección, correo para privacidad, funcionamiento efectivo de conservación de conversaciones y autorización para publicar fotos de profesionales. La dueña puede completar los datos visibles en el panel. El texto legal es una base ajustada al flujo implementado, sujeta a revisión con los datos reales del negocio.
-
-## Contenido pendiente del cliente
-
-- Fotos reales del local y de las profesionales. Las imágenes del local incluidas son ilustrativas y están identificadas. El catálogo usa composiciones gráficas hasta que se suban fotografías propias.
-- Dirección, enlace de Maps, Instagram, correo y horarios individuales.
-- Precio o duración de algunos servicios. Aparecen como «Consultar precio» o «Duración por confirmar».
-- Precios de bonos y combos, si se quieren publicar.
-
-La promoción de cumpleaños se puede consultar en el formulario con una fecha opcional. No se recoge cédula en la web. El documento original mencionaba una promoción por registro, pero esta etapa no crea cuentas de cliente ni verifica descuentos automáticamente; la dueña los confirma por WhatsApp.
-
-## Archivos
-
-- `docs/`: web pública lista para GitHub Pages; `docs/admin/`: panel.
-- `docs/content/site.json`: contenido editable por el panel.
-- `worker/`: función de guardado, contraseña y conexión con GitHub.
-- `tests/`: pruebas del acceso y la escritura.
-- `MENSAJE_PARA_CLIENTE.md`: texto breve para presentar el panel.
-
-## Vista local y pruebas
-
-En la carpeta raíz: `py -m http.server 8000 --directory docs` (Windows) y abre `http://localhost:8000/`. No abras `index.html` con doble clic, porque el navegador puede impedir leer el JSON local.
-
-Para las pruebas: `cd worker`, `npm test`. El guardado real requiere completar la guía de instalación. Si dos personas editan a la vez, el panel impide que la segunda sobrescriba los cambios de la primera y pide recargar.
+La versión está preparada para Supabase, pero requiere un proyecto activo y su configuración antes de habilitar las funciones administrativas. Las imágenes de referencia y los datos legales pendientes deben sustituirse por datos del negocio.

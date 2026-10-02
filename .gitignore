@@ -1,8 +1,5 @@
 node_modules/
-worker/.dev.vars
-worker/.env
-worker/wrangler.toml
+.env
+.env.*
+!.env.example
 .DS_Store
-
-worker/.deploy-secrets.json
-worker/.wrangler/
