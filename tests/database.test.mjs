@@ -28,8 +28,8 @@ test('Postgres: acceso público, RLS, administradores, revisión y códigos',asy
   await db.exec(sql('02_public_seed.sql'));
   const results=await db.exec(sql('03_verify.sql'));
   assert.ok(results.some(r=>r.rows?.some(row=>row.resultado?.includes('verificados'))));
-  const state=await db.query(`select (select count(*) from auth.users) as users,(select count(*) from beauty_private.price_codes) as codes,(select revision from public.beauty_content) as revision`);
-  assert.deepEqual(state.rows,[{users:0,codes:0,revision:1}]);
+  const state=await db.query(`select (select count(*) from auth.users) as users,(select count(*) from beauty_private.admin_emails) as admins,(select count(*) from beauty_private.price_codes) as codes,(select revision from public.beauty_content) as revision`);
+  assert.deepEqual(state.rows,[{users:0,admins:0,codes:0,revision:1}]);
   // NULLs y referencias inexistentes no deben pasar la validación del catálogo.
   const invalid=await db.query(`select public.beauty_validate_content(document-'legal') as missing,public.beauty_validate_content(jsonb_set(document,'{services,0,category}','null')) as null_category,public.beauty_validate_content(jsonb_set(document,'{services,0,price}','-1')) as negative from public.beauty_content`);
   assert.deepEqual(invalid.rows,[{missing:false,null_category:false,negative:false}]);

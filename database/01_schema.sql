@@ -216,13 +216,13 @@ grant execute on function public.beauty_read_prices(text) to anon,authenticated;
 
 create function beauty_private.manage_admin(p_email text,p_active boolean) returns jsonb
 language plpgsql security definer set search_path='' as $$
-declare email text=lower(btrim(p_email));own_email text;
+declare v_email text=lower(btrim(p_email));v_own_email text;
 begin
  if not beauty_private.is_admin() then raise exception 'La cuenta no tiene permiso de administración.' using errcode='42501';end if;
- if email is null or email !~ '^[^ @]+@[^ @]+\.[^ @]+$' or length(email)>254 then raise exception 'Correo inválido.' using errcode='22023';end if;
- select lower(u.email) into own_email from auth.users u where u.id=auth.uid();
- if p_active is not true and email=own_email then raise exception 'No puedes retirar tu propio acceso desde esta sesión.';end if;
- insert into beauty_private.admin_emails(email,active) values(email,p_active) on conflict(email) do update set active=excluded.active;
+ if v_email is null or v_email !~ '^[^ @]+@[^ @]+\.[^ @]+$' or length(v_email)>254 then raise exception 'Correo inválido.' using errcode='22023';end if;
+ select lower(u.email) into v_own_email from auth.users u where u.id=auth.uid();
+ if p_active is not true and v_email=v_own_email then raise exception 'No puedes retirar tu propio acceso desde esta sesión.';end if;
+ insert into beauty_private.admin_emails(email,active) values(v_email,p_active) on conflict(email) do update set active=excluded.active;
  return jsonb_build_object('saved',true);
 end $$;
 create function beauty_private.list_admins() returns jsonb
