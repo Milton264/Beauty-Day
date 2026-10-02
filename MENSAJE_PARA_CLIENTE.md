@@ -1,5 +1,5 @@
-Beauty Day tendrá un catálogo de consulta y un panel administrativo con cuentas individuales. El equipo podrá actualizar textos, servicios, precios, categorías, personal, promociones y fotografías. Los visitantes no podrán modificar el contenido.
+Beauty Day tiene un catálogo con precios reservados y un panel sencillo para gestionar servicios, tarifas, equipo y contenido.
 
-Tras revisar los seguimientos en las tres redes y confirmar la reserva por WhatsApp, el equipo generará un código de 24 horas para consultar las tarifas. Las citas y los seguimientos se verifican manualmente.
+Para ver los precios, la clienta sigue a Beauty Day en Instagram, TikTok y Facebook y solicita la reserva de un servicio. El equipo revisa los seguimientos y confirma la cita por WhatsApp. Después envía un enlace privado: al abrirlo, la clienta ve las tarifas durante 24 horas, sin escribir un código.
 
-La implementación ya está preparada. Falta activar un proyecto de Supabase con cupo disponible, conectar su configuración y crear la primera cuenta administrativa antes de usar el panel.
+El panel guía al equipo con cuatro comprobaciones y prepara el mensaje para copiarlo en WhatsApp. La revisión de seguidores y la confirmación de la reserva las realiza Beauty Day personalmente.

@@ -2,7 +2,7 @@
 
 Web pública y panel administrativo con Supabase Auth, Database y Storage. El navegador realiza las peticiones directamente a Supabase; GitHub Pages aloja los archivos de la web. No requiere un servidor propio.
 
-Los visitantes pueden consultar el catálogo, solicitar una cita por WhatsApp e ingresar un código para consultar precios. No pueden cambiar el contenido ni consultar las tarifas directamente. Los administradores usan correo y contraseña individuales para editar textos, servicios, categorías, equipo, promociones, bonos, combos, contacto y fotografías; también autorizan otros administradores y generan o revocan códigos.
+Los visitantes pueden consultar el catálogo, solicitar una cita por WhatsApp y abrir un enlace privado para consultar precios. No pueden cambiar el contenido ni consultar las tarifas directamente. Los administradores usan correo y contraseña individuales para editar textos, servicios, categorías, equipo, promociones, bonos, combos, contacto y fotografías; también autorizan otros administradores y preparan o retiran enlaces privados.
 
 ## Activación
 
@@ -32,4 +32,6 @@ Las pruebas ejecutan el esquema y sus permisos en Postgres local con PGlite, que
 
 El guardado del contenido y sus precios es una transacción. Una revisión evita sobrescribir cambios de otro administrador. Los códigos duran 24 horas, se almacenan como hashes y se comprueban cada minuto mientras la página está abierta. Las fotografías son públicas; los precios requieren un código vigente. La verificación de seguidores y la confirmación de citas continúan siendo manuales por WhatsApp.
 
-La versión está preparada para Supabase, pero requiere un proyecto activo y su configuración antes de habilitar las funciones administrativas. Las imágenes de referencia y los datos legales pendientes deben sustituirse por datos del negocio.
+El sitio está conectado al proyecto de Supabase de BeautyDay. Las imágenes de referencia y los datos legales pendientes deben sustituirse por datos del negocio.
+
+El panel organiza las tareas en Inicio, Servicios y tarifas y Habilitar precios. Los servicios se editan en fichas individuales. El enlace privado lleva el acceso en el fragmento de la URL y lo retira de la dirección al abrirse. Se conserva el ingreso de códigos anteriores como alternativa.

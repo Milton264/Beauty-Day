@@ -51,7 +51,7 @@ La clave publishable es pública. Los permisos están en RLS y las funciones de 
 
 ## 5. Activar las tarifas y verificar
 
-Entra a [Administración](https://milton264.github.io/Beauty-Day/admin/) con la cuenta confirmada. Completa los precios en Servicios o importa el `site.json` de la copia anterior desde Acceso a precios. La importación copia únicamente las tarifas coincidentes: guarda después. No subas ese JSON con los precios al repositorio público.
+Entra a [Administración](https://milton264.github.io/Beauty-Day/admin/) con la cuenta confirmada. Completa los precios en Servicios y tarifas o importa el `site.json` de la copia anterior desde Habilitar precios. La importación copia únicamente las tarifas coincidentes: guarda después. No subas ese JSON con los precios al repositorio público.
 
 Comprueba que:
 
