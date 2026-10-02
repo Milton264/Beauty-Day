@@ -28,3 +28,4 @@ const secrets = {
 // El archivo solo existe durante la ejecución temporal de GitHub Actions.
 writeFileSync(new URL('./.deploy-secrets.json', import.meta.url), JSON.stringify(secrets), { mode: 0o600 });
 console.log('Secretos del Worker preparados sin mostrar sus valores.');
+

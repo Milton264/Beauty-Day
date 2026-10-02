@@ -1,12 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {pbkdf2Sync} from 'node:crypto';
-import worker,{valid} from '../worker/src/index.js';
+import worker,{valid,codeKey} from '../worker/src/index.js';
 import content from '../docs/content/site.json' with {type:'json'};
 
 const origin='https://beauty.example';
 const salt=Buffer.from('sal-de-prueba-para-editor');
-const env={SITE_ORIGIN:origin,REPO_OWNER:'owner',REPO_NAME:'repo',BRANCH:'main',CONTENT_PATH:'docs/content/site.json',GITHUB_TOKEN:'test',ADMIN_PASSWORD_SALT:salt.toString('base64'),ADMIN_PASSWORD_HASH:pbkdf2Sync('clave-larga-de-prueba',salt,12000,32,'sha256').toString('base64'),ADMIN_SESSION_SECRET:'secreto-de-prueba-de-sesion',LOGIN_LIMITER:{limit:async()=>({success:true})}};
+const kv=new Map();
+const store={get:async(key,type)=>{const value=kv.get(key);return value==null?null:type==='json'?JSON.parse(value):value;},put:async(key,value)=>kv.set(key,value),delete:async key=>kv.delete(key)};
+const env={PRICE_STORE:store,PUBLIC_LIMITER:{limit:async()=>({success:true})},SITE_ORIGIN:origin,REPO_OWNER:'owner',REPO_NAME:'repo',BRANCH:'main',CONTENT_PATH:'docs/content/site.json',GITHUB_TOKEN:'test',ADMIN_PASSWORD_SALT:salt.toString('base64'),ADMIN_PASSWORD_HASH:pbkdf2Sync('clave-larga-de-prueba',salt,12000,32,'sha256').toString('base64'),ADMIN_SESSION_SECRET:'secreto-de-prueba-de-sesion',LOGIN_LIMITER:{limit:async()=>({success:true})}};
 const req=(url,method='GET',body,headers={})=>new Request('https://worker.example'+url,{method,headers:{Origin:origin,...headers},body});
 
 test('contenido inicial válido y rechazo de rutas peligrosas',()=>{
@@ -52,7 +54,8 @@ test('guardado autorizado crea commit con SHA actual',async()=>{
     return new Response(JSON.stringify({sha:'abc123'}),{status:200});
   };
   try{
-    const response=await worker.fetch(req('/api/content','PUT',JSON.stringify({content,sha:'abc123'}),{'Content-Type':'application/json',Authorization:'Bearer '+token}),env);
+    const priced=structuredClone(content);priced.services[0].price=55555;priced.services[0].pricePrefix='Desde ';
+    const response=await worker.fetch(req('/api/content','PUT',JSON.stringify({content:priced,sha:'abc123'}),{'Content-Type':'application/json',Authorization:'Bearer '+token}),env);
     assert.equal(response.status,200);
     assert.equal((await response.json()).sha,'nuevo-sha');
     assert.equal(calls.length,2);
@@ -60,6 +63,10 @@ test('guardado autorizado crea commit con SHA actual',async()=>{
     const body=JSON.parse(calls[1].options.body);
     assert.equal(body.sha,'abc123');
     assert.equal(body.branch,'main');
+    const published=JSON.parse(Buffer.from(body.content,'base64').toString());
+    assert.equal(published.services[0].price,null);
+    assert.equal(published.services[0].pricePrefix,'');
+    assert.equal(JSON.parse(kv.get('catalog')).prices[0].price,55555);
   }finally{globalThis.fetch=previous;}
 });
 test('foto válida se almacena con ruta nueva y sin exponer token al navegador',async()=>{
@@ -76,4 +83,29 @@ test('foto válida se almacena con ruta nueva y sin exponer token al navegador',
     assert.equal(githubBody.content,base64);
     assert.equal(githubBody.branch,'main');
   }finally{globalThis.fetch=previous;}
+});
+
+test('solo una revisión administrativa completa entrega acceso; código permite consultar, nunca editar',async()=>{
+ kv.clear();kv.set('catalog',JSON.stringify({prices:[{id:'s01',price:55555,pricePrefix:''}]}));
+ const login=await worker.fetch(req('/api/login','POST',JSON.stringify({password:'clave-larga-de-prueba'})),env);
+ const {token}=await login.json();const headers={Authorization:'Bearer '+token};
+ const checks={instagram:true,tiktok:true,facebook:true,reservation:true};
+ const noAuth=await worker.fetch(req('/api/access','POST',JSON.stringify({checks})),env);assert.equal(noAuth.status,401);
+ const missing=await worker.fetch(req('/api/access','POST',JSON.stringify({checks:{...checks,reservation:false}}),headers),env);assert.equal(missing.status,400);
+ const wrongTypes=await worker.fetch(req('/api/access','POST',JSON.stringify({checks:{...checks,instagram:'true'}}),headers),env);assert.equal(wrongTypes.status,400);
+ const issued=await worker.fetch(req('/api/access','POST',JSON.stringify({checks}),headers),env);assert.equal(issued.status,201);
+ const {code,expiresAt}=await issued.json();assert.equal(code.replaceAll('-','').length,32);assert.ok(expiresAt>Date.now());
+ const access=await worker.fetch(req('/api/prices','POST',JSON.stringify({code})),env);assert.equal(access.status,200);assert.equal((await access.json()).prices[0].price,55555);assert.equal(access.headers.get('Cache-Control'),'no-store');
+ const codeAsAdmin=await worker.fetch(req('/api/content','GET',undefined,{Authorization:'Bearer '+code}),env);assert.equal(codeAsAdmin.status,401);
+ const invalid=await worker.fetch(req('/api/prices','POST',JSON.stringify({code:'0'.repeat(32)})),env);assert.equal(invalid.status,401);assert.doesNotMatch(await invalid.text(),/55555/);
+ const revoked=await worker.fetch(req('/api/access/revoke','POST',JSON.stringify({code}),headers),env);assert.equal(revoked.status,200);
+ const denied=await worker.fetch(req('/api/prices','POST',JSON.stringify({code})),env);assert.equal(denied.status,401);
+ kv.set(await codeKey(code.replaceAll('-','')),JSON.stringify({approved:true,exp:Date.now()-1}));
+ const expired=await worker.fetch(req('/api/prices','POST',JSON.stringify({code})),env);assert.equal(expired.status,401);
+});
+test('fallos de configuración, abuso y JSON inválido conservan los precios cerrados',async()=>{
+ const unavailable=await worker.fetch(req('/api/prices','POST','{}'),{...env,PRICE_STORE:undefined});assert.equal(unavailable.status,503);
+ const limited=await worker.fetch(req('/api/prices','POST','{}'),{...env,PUBLIC_LIMITER:{limit:async()=>({success:false})}});assert.equal(limited.status,429);
+ const invalid=await worker.fetch(req('/api/prices','POST','invalid-json'),env);assert.equal(invalid.status,400);
+ const large=await worker.fetch(req('/api/prices','POST','x'.repeat(2000)),env);assert.equal(large.status,413);
 });

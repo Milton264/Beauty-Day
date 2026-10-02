@@ -1,3 +1,5 @@
+> Versión 3: antes de publicar, completa también **ACTIVAR_PRECIOS.md** para el almacenamiento privado de tarifas.
+
 # Beauty Day: instalación paso a paso en Windows
 
 Esta guía es para **Milton**, una sola vez. La dueña del spa no realiza ninguno de estos pasos técnicos. Al terminar, solo recibe la dirección del panel y su contraseña.

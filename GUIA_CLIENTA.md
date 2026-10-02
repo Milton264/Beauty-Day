@@ -13,3 +13,8 @@ Si una profesional deja de trabajar en Beauty Day, entra a **Equipo**, pulsa **E
 En **Privacidad** aparecerá el nombre legal o razón social de quien administra el spa y un correo para solicitudes relacionadas con datos personales. Estos datos deben ser reales. Las solicitudes de cita llegarán por WhatsApp y tú confirmarás directamente si el horario está libre; el sitio no confirma citas automáticamente.
 
 No necesitas abrir GitHub, Cloudflare ni editar código.
+
+
+## Acceso a los precios
+
+Revisa Instagram, TikTok y Facebook, comunica el importe y confirma la reserva por WhatsApp. Luego entra a **Acceso a precios**, marca las cuatro comprobaciones y genera el código de 24 horas. Copia el mensaje para enviarlo al cliente. Para retirarlo, usa **Retirar un acceso**. No se habilitan tarifas al abrir una red ni al preparar una solicitud.

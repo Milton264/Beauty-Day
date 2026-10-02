@@ -28,3 +28,4 @@ Avísame «listo» sin enviarme los valores. Yo activaré la acción y comprobar
 Si el despliegue indica que falta un subdominio `workers.dev`, entra a **Workers & Pages** de tu cuenta de Cloudflare y configura el subdominio de tu cuenta. Después vuelve a ejecutar la acción. Si aparece otro error, comparte el enlace de la ejecución de Actions, sin copiar secretos.
 
 Documentación oficial: [Cloudflare Actions](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/), [tokens personales de GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) y [secretos de GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions).
+

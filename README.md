@@ -1,3 +1,7 @@
+# Beauty Day · Versión 3
+
+Cambio a palo de rosa y precios reservados. Consulta **ACTIVAR_PRECIOS.md** antes de activar el panel y las tarifas.
+
 # Beauty Day · Atelier
 
 Web para GitHub Pages y panel de edición de contenido. La parte pública usa HTML, CSS y JavaScript separados. El panel está en `docs/admin/` y guarda cambios mediante una pequeña función externa de Cloudflare.

@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Preparar credenciales del editor
         run: node worker/prepare-deploy-secrets.mjs
@@ -28,6 +30,12 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           BEAUTY_DAY_GITHUB_TOKEN: ${{ secrets.BEAUTY_DAY_GITHUB_TOKEN }}
           BEAUTY_DAY_ADMIN_PASSWORD: ${{ secrets.BEAUTY_DAY_ADMIN_PASSWORD }}
+
+      - name: Preparar almacén privado de tarifas
+        run: node worker/prepare-price-store.mjs
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Desplegar Worker
         id: deploy
@@ -69,3 +77,4 @@ jobs:
         run: |
           echo "Worker: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Panel: https://milton264.github.io/Beauty-Day/admin/" >> "$GITHUB_STEP_SUMMARY"
+
