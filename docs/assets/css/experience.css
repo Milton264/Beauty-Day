@@ -27,3 +27,13 @@ body{overflow-x:hidden}
 .ritual-strip-inner{width:100%}
 .legal-page .legal-nav{position:static;inset:auto;margin:50px 0 0;background:transparent;padding:24px 0 0;align-items:center}
 .legal-page .legal-nav a{padding:0}
+
+/* Fotografías del salón, conservadas en el repositorio. */
+.work-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.work-photo{display:block;overflow:hidden;background:var(--cream);border:1px solid var(--line)}
+.work-photo img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:contain;background:#f0e7e8}
+.work-photo>span{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.work-photo b{font-size:20px;font-weight:400}
+.work-photo:hover,.work-photo:focus-visible{border-color:var(--rose)}
+@media(max-width:800px){.work-gallery{gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:400px){.work-gallery{gap:10px}.work-photo>span{padding:10px;font-size:10px}}

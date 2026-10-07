@@ -6,7 +6,7 @@ El panel abre en **Inicio**, con accesos a las tareas frecuentes. En un teléfon
 
 1. En **Servicios y tarifas**, busca por nombre o filtra por categoría. Pulsa **Editar** para abrir un solo servicio. **Guardar servicio** publica ese cambio; **Cancelar** descarta la edición. Los precios permanecen privados.
 2. En **Equipo**, **Promociones**, **Bonos de regalo** y **Combos**, abre la ficha que necesitas y guarda sus cambios desde el editor.
-3. En **Portada y textos**, cambia la presentación y la imagen principal. En **Contacto y redes**, actualiza WhatsApp, dirección, horario y los tres perfiles sociales.
+3. En **Portada y textos**, cambia la presentación, la imagen principal, el detalle de portada y la foto de presentación. La galería del inicio muestra hasta seis fotografías diferentes tomadas de tus servicios. En **Contacto y redes**, actualiza WhatsApp, dirección, horario y los tres perfiles sociales.
 4. Para cambiar una fotografía, selecciona JPG, PNG o WebP. El panel la optimiza. Guarda la ficha o pulsa **Publicar cambios**, según la sección.
 5. **Categorías** organiza el catálogo y las especialidades. **Privacidad** permite completar los datos del responsable.
 

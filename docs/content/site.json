@@ -5,8 +5,10 @@
     "eyebrow": "SPA & PELUQUERÍA",
     "heroTitle": "El arte de dedicarte tiempo.",
     "heroSubtitle": "Uñas, cabello, mirada y bienestar en un solo lugar.",
-    "heroImage": "assets/img/salon-referencia.webp",
-    "heroImageIsReference": true
+    "heroImage": "assets/img/beauty-day/unas-rosas.webp",
+    "heroImageIsReference": false,
+    "detailImage": "assets/img/beauty-day/unas-corazones.webp",
+    "storyImage": "assets/img/beauty-day/unas-ondas.webp"
   },
   "contact": {
     "whatsapp": "573242889865",
@@ -35,7 +37,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": 60,
-      "image": "",
+      "image": "assets/img/beauty-day/unas-rosas.webp",
       "featured": true
     },
     {
@@ -46,7 +48,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": 60,
-      "image": "",
+      "image": "assets/img/beauty-day/unas-ondas.webp",
       "featured": false
     },
     {
@@ -68,7 +70,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": 120,
-      "image": "",
+      "image": "assets/img/beauty-day/unas-corazones.webp",
       "featured": false
     },
     {
@@ -79,7 +81,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": null,
-      "image": "",
+      "image": "assets/img/beauty-day/unas-violetas.webp",
       "featured": false
     },
     {
@@ -90,7 +92,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": 120,
-      "image": "",
+      "image": "assets/img/beauty-day/unas-celestes.webp",
       "featured": false
     },
     {
@@ -101,7 +103,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": null,
-      "image": "",
+      "image": "assets/img/beauty-day/unas-azules.webp",
       "featured": false
     },
     {
@@ -112,7 +114,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": 60,
-      "image": "",
+      "image": "assets/img/beauty-day/unas-rosas.webp",
       "featured": false
     },
     {
@@ -167,7 +169,7 @@
       "price": null,
       "pricePrefix": "",
       "duration": null,
-      "image": "",
+      "image": "assets/img/beauty-day/parafina.webp",
       "featured": false
     },
     {
