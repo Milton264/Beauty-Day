@@ -51,6 +51,7 @@ La autorización depende de una identidad confirmada en Auth y de una fila activ
 - Los 45 detalles de servicios, los 4 perfiles, las rutas de contacto, bonos, promociones, búsqueda, privacidad y reservas se generan correctamente.
 - Escenario de 12 categorías, 100 servicios, 30 profesionales, 30 promociones, 30 bonos y 30 combos, con nombres largos. También se prueba contenido vacío y texto que contiene HTML.
 - Compilación del cliente de Supabase y comprobación de sintaxis de los scripts.
+- Auditoría de dependencias de producción: cero vulnerabilidades conocidas en la comprobación realizada.
 
 En la base publicada, con la clave pública y sin sesión, se verificaron estas respuestas:
 

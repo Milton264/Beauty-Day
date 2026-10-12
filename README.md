@@ -1,14 +1,14 @@
 # Beauty Day
 
-Web pública y panel administrativo con Supabase Auth, Database y Storage. El navegador realiza las peticiones directamente a Supabase; GitHub Pages aloja los archivos de la web. No requiere un servidor propio.
+Web pública y panel administrativo con Supabase Auth, Database y Storage. El navegador realiza las peticiones directamente a Supabase; Cloudflare aloja los archivos de la web. No requiere un servidor propio.
 
-Los visitantes pueden consultar el catálogo, solicitar una cita por WhatsApp y abrir un enlace privado para consultar precios. No pueden cambiar el contenido ni consultar las tarifas directamente. Los administradores usan correo y contraseña individuales para editar textos, servicios, categorías, equipo, promociones, bonos, combos, contacto y fotografías; también autorizan otros administradores y preparan o retiran enlaces privados.
+Los visitantes pueden consultar el catálogo, solicitar una cita por WhatsApp y abrir un enlace privado para consultar precios. No pueden cambiar el contenido ni consultar las tarifas directamente. Los administradores usan correo y contraseña individuales para editar textos, servicios, categorías, equipo, promociones, bonos, combos, contacto y fotografías; también autorizan al equipo y preparan o retiran enlaces privados. El rol de atención por WhatsApp solo permite habilitar precios y retirar sus propios enlaces.
 
 ## Activación
 
 Consulta [CONFIGURAR_SUPABASE.md](CONFIGURAR_SUPABASE.md). La configuración pública está en `docs/admin/config.js`; nunca incluyas una clave `service_role` o `sb_secret_`, una contraseña o un token de GitHub. El acceso real se verifica en la base de datos con RLS y funciones SQL.
 
-Las contraseñas se gestionan en Supabase Auth. `beauty_private.admin_emails` solo contiene los correos autorizados; registrar una cuenta por sí solo no concede permisos administrativos.
+Las contraseñas se gestionan en Supabase Auth. `beauty_private.admin_emails` contiene los correos autorizados, su estado y su rol; registrar una cuenta por sí solo no concede permisos administrativos.
 
 ## Desarrollo
 
@@ -24,7 +24,7 @@ Las pruebas ejecutan el esquema y sus permisos en Postgres local con PGlite, que
 
 `src/data.js` es el adaptador de Supabase; `docs/assets/js/data.js` es el archivo compilado que se publica. El SDK y la herramienta de compilación están fijados en `package-lock.json`.
 
-- `docs/`: sitio público y panel, publicados desde GitHub Pages.
+- `docs/`: sitio público y panel, listos para Cloudflare Workers Static Assets o Pages.
 - `database/01_schema.sql`: tablas, validación, permisos y operaciones.
 - `database/02_public_seed.sql`: contenido inicial sin importes.
 - `database/03_verify.sql`: comprobación transaccional de permisos y códigos; termina con ROLLBACK.
