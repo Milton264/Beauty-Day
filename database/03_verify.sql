@@ -46,6 +46,7 @@ set local role authenticated;
 do $$declare r jsonb;c jsonb;begin
  if not beauty_private.is_admin() then raise exception 'Fallo: administrador sin permiso';end if;
  insert into storage.objects(bucket_id,name) values('beauty-images','test-allowed.jpg');
+ if not exists(select 1 from storage.objects where name='test-allowed.jpg') then raise exception 'Fallo: administración no lista sus fotos';end if;
  if jsonb_array_length(public.beauty_list_admins())<2 then raise exception 'Fallo: no lista administradores';end if;
  r=public.beauty_manage_admin(' Beauty-Test-Invite@Example.Invalid ',true);
  if r->>'saved'<>'true' then raise exception 'Fallo: no autoriza un correo nuevo';end if;
@@ -75,7 +76,10 @@ select set_config('request.jwt.claim.sub','',true);
 set local role anon;
 do $$begin
  if jsonb_array_length(public.beauty_read_prices((select code from beauty_test_state))->'prices')<1 then raise exception 'Fallo: visitante con código no lee tarifas';end if;
- if not exists(select 1 from storage.objects where name='test-allowed.jpg') then raise exception 'Fallo: foto pública no visible';end if;
+ begin
+  if exists(select 1 from storage.objects where name='test-allowed.jpg') then raise exception 'Fallo: visitante lista archivos de Storage';end if;
+ exception when insufficient_privilege then null;
+ end;
 end $$;
 reset role;
 select set_config('request.jwt.claim.sub',admin_id::text,true) from beauty_test_state;

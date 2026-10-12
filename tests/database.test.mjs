@@ -26,10 +26,10 @@ test('Postgres: acceso público, RLS, administradores, revisión y códigos',asy
   `);
   await db.exec(sql('01_schema.sql'));
   await db.exec(sql('02_public_seed.sql'));
-  const migration=readdirSync(new URL('../supabase/migrations/',import.meta.url)).find(n=>n.endsWith('_beauty_roles_validation.sql'));
-  await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
+  const migrations=readdirSync(new URL('../supabase/migrations/',import.meta.url)).filter(n=>n.endsWith('.sql')).sort();
+  for(const migration of migrations) await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
   // Ejecutar dos veces conserva datos y permisos, sin duplicar objetos.
-  await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
+  for(const migration of migrations) await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
   const results=await db.exec(sql('03_verify.sql'));
   const roles=await db.exec(sql('04_verify_roles.sql'));
   assert.ok(roles.some(r=>r.rows?.some(row=>row.resultado?.includes('Rol de atención'))));

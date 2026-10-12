@@ -76,7 +76,7 @@
     general:['Tu web','Portada y textos','Edita la primera impresión de tu salón.'],
     contact:['Configuración','Contacto y redes','Mantén a mano los datos que necesitan tus clientas.'],
     categories:['Configuración','Categorías','Organiza tu catálogo y las especialidades del equipo.'],
-    administrators:['Configuración','Administradores','Gestiona quién puede entrar a este espacio.'],
+    administrators:['Configuración','Equipo y permisos','Autoriza correos y elige entre administración completa y atención por WhatsApp.'],
     legal:['Configuración','Privacidad','Los datos del responsable que aparecen en la web.']
   };
   const icons = {

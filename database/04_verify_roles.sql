@@ -47,6 +47,7 @@ do $$declare r jsonb;n integer;begin
  if r->>'role'<>'support' or not(r->>'pricesConfigured')::boolean then raise exception 'Fallo: panel de atención';end if;
  if exists(select 1 from jsonb_array_elements(r#>'{content,services}') s where s->'price'<>'null'::jsonb or s->>'pricePrefix'<>'') then raise exception 'Fallo: atención recibe tarifas privadas';end if;
  if exists(select 1 from public.beauty_prices) then raise exception 'Fallo: atención consulta precios directamente';end if;
+ if exists(select 1 from storage.objects where bucket_id='beauty-images') then raise exception 'Fallo: atención lista archivos de Storage';end if;
  begin perform public.beauty_admin_read();raise exception 'Fallo: atención abre editor';exception when insufficient_privilege then null;end;
  begin perform public.beauty_save_content((select doc from beauty_role_test),1);raise exception 'Fallo: atención guarda contenido';exception when insufficient_privilege then null;end;
  begin perform public.beauty_manage_member('role-invite@example.invalid',true,'admin');raise exception 'Fallo: atención asigna roles';exception when insufficient_privilege then null;end;
@@ -56,8 +57,13 @@ do $$declare r jsonb;n integer;begin
  begin insert into storage.objects(bucket_id,name) values('beauty-images','role-denied.jpg');raise exception 'Fallo: atención sube fotos';exception when insufficient_privilege then null;end;
  update public.beauty_content set revision=revision+1;get diagnostics n=row_count;
  if n<>0 then raise exception 'Fallo: atención edita directamente';end if;
- delete from storage.objects where name='role-test-admin-photo.jpg';get diagnostics n=row_count;
- if n<>0 then raise exception 'Fallo: atención elimina fotografías';end if;
+ -- Supabase también puede rechazar DELETE mediante storage.protect_delete().
+ -- Ambos resultados son seguros: permiso denegado o cero filas afectadas por RLS.
+ begin
+  delete from storage.objects where name='role-test-admin-photo.jpg';get diagnostics n=row_count;
+  if n<>0 then raise exception 'Fallo: atención elimina fotografías';end if;
+ exception when insufficient_privilege then null;
+ end;
  begin perform public.beauty_issue_code('{"instagram":true,"tiktok":true,"facebook":true,"reservation":false}');raise exception 'Fallo: atención omite la reserva';exception when invalid_parameter_value then null;end;
  update beauty_role_test set own_code=public.beauty_issue_code('{"instagram":true,"tiktok":true,"facebook":true,"reservation":true}')->>'code';
  if not(public.beauty_read_prices((select own_code from beauty_role_test)) ? 'prices') then raise exception 'Fallo: enlace de atención no habilita';end if;
