@@ -35,3 +35,7 @@ El guardado del contenido y sus precios es una transacción. Una revisión evita
 El sitio está conectado al proyecto de Supabase de BeautyDay. Las imágenes de referencia y los datos legales pendientes deben sustituirse por datos del negocio.
 
 El panel organiza las tareas en Inicio, Servicios y tarifas y Habilitar precios. Los servicios se editan en fichas individuales. El enlace privado lleva el acceso en el fragmento de la URL y lo retira de la dirección al abrirse. Se conserva el ingreso de códigos anteriores como alternativa.
+
+## Actualización: funciones y rol de WhatsApp
+
+Consulta [AUDITORIA_BEAUTY_DAY.md](AUDITORIA_BEAUTY_DAY.md) para las correcciones, la matriz de permisos, las pruebas y el orden de instalación. Antes de publicar el cliente 4.1, aplica la actualización SQL de `supabase/migrations/`. Nunca vuelvas a cargar el contenido inicial en una base de producción existente.

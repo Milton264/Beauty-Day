@@ -1,0 +1,42 @@
+/* Contenido variable: categorías, nombres largos y fotografías de cualquier forma. */
+.category-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.category-tile,.category-tile:nth-child(-n+2),.category-tile:last-child{grid-column:auto;min-width:0;min-height:225px}
+.category-tile strong{max-width:100%;overflow-wrap:anywhere}
+.filter-list{min-width:0;max-width:100%;flex:1;flex-wrap:wrap}
+.filter{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.catalog-tools>*{min-width:0}
+.search-box{flex:0 0 240px;max-width:100%}
+.cards.three,.person-grid,.number-grid,.mood-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}
+.service-card,.person-card,.number-card,.promo-card,.team-preview-card,.detail-copy,.story-copy,.combo-copy{min-width:0}
+.card-body h3,.card-body p,.person-data h3,.number-card h3,.promo-card h3,.combo-copy h3,.detail-copy h1,.detail-facts strong,.team-preview-bottom strong{overflow-wrap:anywhere}
+.card-meta{flex-wrap:wrap}.card-meta strong{white-space:normal}
+.benefit-photo{width:100%;padding:12px;background:#f6eef2;border:1px solid var(--line);margin-bottom:22px;flex:none}
+.benefit-photo img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain}
+.promo-card>.benefit-photo{align-self:stretch}
+.number-card>.benefit-photo{margin-bottom:18px}
+.card-image,.portrait,.detail-image,.work-photo{padding:12px;border:1px solid var(--line);background:#f0e7e8}
+.card-image img,.detail-image img{object-fit:contain;max-width:100%;height:auto}
+.portrait img{height:100%;max-height:100%}
+.work-photo img{background:transparent}
+.work-photo>span{padding-inline:5px}
+.hero-image-main{padding:12px;border:1px solid #6e605e;background:var(--dark)}
+.hero-image-main img{width:100%;height:100%;object-fit:contain}
+.hero-image-detail img{object-fit:contain}
+.story-image{padding:14px;height:clamp(320px,40vw,520px);min-height:0}
+.story-image img{position:relative;inset:auto;height:100%;width:100%;object-fit:contain}
+.team-preview-card:has(img){border:12px solid #f0e7e8}
+.photo-unavailable{display:grid;place-items:center;min-height:150px;width:100%;height:100%;background:#f0e7e8;color:var(--rose);font-size:14px;text-align:center;padding:20px}
+.combo-list article.combo-with-photo{grid-template-columns:42px minmax(90px,150px) minmax(0,1fr) 35px}
+.combo-list .benefit-photo{margin:0;padding:8px}
+.combo-copy{min-width:0;overflow-wrap:anywhere}
+.contact-socials{border-top:1px solid var(--line);padding-top:20px;margin-top:20px}
+.contact-socials h3{font-size:16px}.contact-socials .social-links{flex-wrap:wrap}
+.contact-panel,.location-panel,.booking-main,.booking-summary{min-width:0}
+.contact-line a,.contact-line strong,.booking-summary dd,.option strong,.option small,.option b{overflow-wrap:anywhere}
+.option{min-width:0;flex-wrap:wrap}.option>span{min-width:0}
+.hero-copy h1,.hero-copy p,.story-copy h2,.story-copy p{overflow-wrap:anywhere}
+@media(max-width:1050px){#site-header{height:70px}.menu-toggle{display:block;margin-left:auto}#main-nav{display:none;position:absolute;top:70px;left:0;right:0;margin:0;padding:16px 22px 25px;background:#fff;border-top:1px solid var(--line);flex-direction:column;align-items:stretch;gap:0}#main-nav.open{display:flex}#main-nav a{padding:12px;font-size:16px}}
+@media(max-width:800px){.search-box{flex-basis:100%}.catalog-tools{flex-wrap:wrap}.promo-row{grid-template-columns:1fr}.story-image{min-height:0;height:360px}}
+@media(max-width:600px){.category-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px}.category-tile,.category-tile:nth-child(-n+2),.category-tile:last-child{min-height:175px;padding:16px}.category-tile strong{font-size:27px}.filter-list{flex-wrap:wrap;overflow:visible;padding-bottom:0}.search-box{width:100%;margin-top:16px}.cards.three,.person-grid,.number-grid,.mood-grid{grid-template-columns:minmax(0,1fr)}.story-image{height:320px}.combo-list article.combo-with-photo{grid-template-columns:30px minmax(0,1fr) 30px}.combo-list .combo-with-photo>.benefit-photo{grid-column:2;grid-row:1}.combo-list .combo-with-photo>.combo-copy{grid-column:2;grid-row:2}.combo-list .combo-with-photo>a{grid-column:3;grid-row:1/3}.combo-list .combo-with-photo>span{grid-column:1;grid-row:1}.team-preview-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.team-preview-card{padding:10px}.team-preview-card:has(img){border-width:8px}.team-preview-bottom strong{font-size:22px}.hero-image-main{padding:8px}.benefit-photo{padding:10px}}
+
+.service-art strong,.art-foot,.work-photo>span,.section-head h2,.page-intro h1{overflow-wrap:anywhere;max-width:100%}.work-photo>span{gap:12px}.work-photo b{flex:none}

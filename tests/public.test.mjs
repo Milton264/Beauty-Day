@@ -16,7 +16,8 @@ test('rutas públicas, carrusel, privacidad y reserva se generan sin errores',as
   const location={hash:''};
   const window={BeautyData:{content:async()=>content,prices:async()=>{throw Error('El código es inválido o venció.');}},addEventListener:(event,fn)=>listeners[event]=fn,scrollTo(){},matchMedia:()=>({matches:true})};
   const context={document,window,location,sessionStorage:storage,localStorage:storage,fetch:async()=>({ok:true,json:async()=>content}),URL,URLSearchParams,clearTimeout(){},setInterval(){},Date,Number,String,Array,Math,encodeURIComponent,setTimeout};
-  vm.runInNewContext(readFileSync(new URL('../docs/assets/js/access-link.js',import.meta.url),'utf8'),context);
+  vm.runInNewContext(readFileSync(new URL('../docs/assets/js/media.js',import.meta.url),'utf8'),context);
+ vm.runInNewContext(readFileSync(new URL('../docs/assets/js/access-link.js',import.meta.url),'utf8'),context);
   vm.runInNewContext(readFileSync(new URL('../docs/assets/js/app.js',import.meta.url),'utf8'),context);
   await new Promise(resolve=>setImmediate(resolve));
   assert.match(node('#main').innerHTML,/hero-inner/);
@@ -48,6 +49,7 @@ test('el código habilita tarifas y una revocación vuelve a ocultarlas',async()
  const location={hash:'#/precios'};
  const window={BeautyData:{content:async()=>content,prices:async()=>{if(revoked)throw Error('El código es inválido o venció.');return {expiresAt:Date.now()+60000,prices:[{id:'s01',price:777,pricePrefix:''}]};}},addEventListener:(event,fn)=>listeners[event]=fn,scrollTo(){},matchMedia:()=>({matches:true})};
  const context={document,window,location,sessionStorage:storage,localStorage:storage,URL,URLSearchParams,Date,Number,String,Array,Math,encodeURIComponent,setTimeout(){return 1;},clearTimeout(){},setInterval:fn=>interval=fn};
+ vm.runInNewContext(readFileSync(new URL('../docs/assets/js/media.js',import.meta.url),'utf8'),context);
  vm.runInNewContext(readFileSync(new URL('../docs/assets/js/access-link.js',import.meta.url),'utf8'),context);
  vm.runInNewContext(readFileSync(new URL('../docs/assets/js/app.js',import.meta.url),'utf8'),context);
  await new Promise(resolve=>setImmediate(resolve));
@@ -78,7 +80,7 @@ async function openPrivateLink({reject=false,token='0123456789abcdef0123456789ab
  const history={replaceState(_state,_unused,url){replaced.push(url);location.hash=new URL(url,'https://salon.test').hash;}};
  const window={BeautyData:{content:async()=>content,prices:async code=>{calls.push(code);if(reject)throw Error('El código es inválido o venció.');return {expiresAt:Date.now()+60000,prices:[{id:'s01',price:777,pricePrefix:''}]};}},addEventListener:(event,fn)=>listeners[event]=fn,scrollTo(){},matchMedia:()=>({matches:true})};
  const context={window,document,location,history,sessionStorage:storage,localStorage:storage,URL,URLSearchParams,Date,Number,String,Array,Math,encodeURIComponent,setTimeout(){return 1;},clearTimeout(){},setInterval(){}};
- for(const script of ['access-link.js','app.js'])vm.runInNewContext(readFileSync(new URL('../docs/assets/js/'+script,import.meta.url),'utf8'),context);
+ for(const script of ['media.js','access-link.js','app.js'])vm.runInNewContext(readFileSync(new URL('../docs/assets/js/'+script,import.meta.url),'utf8'),context);
  await new Promise(resolve=>setImmediate(resolve));
  return {main:node('#main').innerHTML,replaced,calls,saved,location};
 }

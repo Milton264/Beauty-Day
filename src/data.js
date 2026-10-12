@@ -5,7 +5,7 @@ const memory=new Map();
 const storage={getItem:key=>{try{return sessionStorage.getItem(key);}catch{return memory.get(key)||null;}},setItem:(key,value)=>{try{sessionStorage.setItem(key,value);}catch{memory.set(key,value);}},removeItem:key=>{try{sessionStorage.removeItem(key);}catch{memory.delete(key);}}};
 const db=configured?createClient(settings.url,settings.publishableKey,{auth:{storage,storageKey:'beauty_day_admin_session',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}}):null;
 function requireDb(){if(!db)throw Error('Falta conectar la base de datos de Beauty Day.');return db;}
-function unwrap(result){if(result.error)throw Error(result.error.message||'No pudimos completar la petición.');if(result.data?.error)throw Error(result.data.error);return result.data;}
+function unwrap(result){if(result.error){const error=Error(result.error.code==='PGRST202'?'Falta aplicar la actualización de Beauty Day en la base de datos.':result.error.message||'No pudimos completar la petición.');error.code=result.error.code;throw error;}if(result.data?.error)throw Error(result.data.error);return result.data;}
 async function rpc(name,params={}){return unwrap(await requireDb().rpc(name,params));}
 window.BeautyData={
  configured,
@@ -20,11 +20,13 @@ window.BeautyData={
  async changePassword(password){if(password.length<12)throw Error('Usa una contraseña de al menos 12 caracteres.');return unwrap(await requireDb().auth.updateUser({password}));},
  onAuthChange(callback){if(db)return db.auth.onAuthStateChange(callback);return null;},
  adminContent:()=>rpc('beauty_admin_read'),
+  panelSession:()=>rpc('beauty_panel_session'),
  saveContent:(content,revision)=>rpc('beauty_save_content',{p_content:content,p_revision:revision}),
  issueCode:checks=>rpc('beauty_issue_code',{p_checks:checks}),
  revokeCode:code=>rpc('beauty_revoke_code',{p_code:code}),
  admins:()=>rpc('beauty_list_admins'),
  manageAdmin:(email,active)=>rpc('beauty_manage_admin',{p_email:email,p_active:active}),
+  manageMember:(email,active,role)=>rpc('beauty_manage_member',{p_email:email,p_active:active,p_role:role}),
  async upload(file){
   if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>500000)throw Error('Usa una foto JPG, PNG o WebP de hasta 500 KB.');
   const ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type],path=`photos/${crypto.randomUUID()}.${ext}`;

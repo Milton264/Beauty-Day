@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import content from '../docs/content/site.json' with {type:'json'};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
-async function panel(){
+async function panel(role='admin'){
  let markup='',modal='',fail=false,draftInputs=[],saved=[],issued=[];
  const nodes=new Map();
  const node=key=>{
@@ -22,9 +22,10 @@ async function panel(){
  };
  const document={querySelector:query,querySelectorAll:selector=>selector==='[data-draft]'?draftInputs:[],activeElement:{focus(){}}};
  const privateContent=structuredClone(content);privateContent.services[0].price=20000;
- const backend={configured:true,onAuthChange(){},session:async()=>({user:{}}),adminContent:async()=>({content:privateContent,revision:'rev1',pricesConfigured:true}),saveContent:async(next,revision)=>{saved.push({next:structuredClone(next),revision});if(fail)throw Error('Otra persona guardó. Recarga para continuar.');return {revision:'rev2',pricesConfigured:true};},issueCode:async checks=>{issued.push(checks);return {code:'01234567-89ab-cdef-0123-456789abcdef',expiresAt:Date.now()+86400000};},signOut:async()=>{}};
+ const backend={configured:true,onAuthChange(){},session:async()=>({user:{}}),panelSession:async()=>({role,content:privateContent,revision:'rev1',pricesConfigured:true}),saveContent:async(next,revision)=>{saved.push({next:structuredClone(next),revision});if(fail)throw Error('Otra persona guardó. Recarga para continuar.');return {revision:'rev2',pricesConfigured:true};},issueCode:async checks=>{issued.push(checks);return {code:'01234567-89ab-cdef-0123-456789abcdef',expiresAt:Date.now()+86400000};},signOut:async()=>{}};
  const window={BeautyData:backend,addEventListener(){},matchMedia:()=>({matches:true})};
  const context={window,document,location:{href:'https://salon.test/Beauty-Day/admin/'},navigator:{clipboard:{writeText:async()=>{}}},URL,URLSearchParams,structuredClone,Intl,Date,Number,String,Array,Object,Math,crypto:{randomUUID:()=> 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'},confirm:()=>true,setTimeout(){}};
+ vm.runInNewContext(readFileSync(new URL('../docs/assets/js/media.js',import.meta.url),'utf8'),context);
  vm.runInNewContext(readFileSync(new URL('../docs/assets/js/access-link.js',import.meta.url),'utf8'),context);
  const source=readFileSync(new URL('../docs/admin/admin.js',import.meta.url),'utf8').replace(/\}\)\(\);\s*$/,`window.review={select(key){tab=key;editor();},openEntry,state:()=>({data,sha,dirty})};})();`);
  vm.runInNewContext(source,context);await tick();
@@ -55,4 +56,30 @@ test('habilitar precios exige cuatro comprobaciones y prepara un enlace para la 
  assert.equal(p.issued.length,1);assert.ok(Object.values(p.issued[0]).every(Boolean));
  assert.match(p.node('#grant-message').value,/Hola Valentina/);assert.match(p.node('#grant-message').value,/https:\/\/salon.test\/Beauty-Day\/#\/servicios\?acceso=[a-f0-9]{32}/);
  assert.equal(p.node('#grant-result').hidden,false);assert.equal(button.disabled,true);
+});
+
+test('atención solo muestra sus tareas y bloquea el editor de contenido',async()=>{
+ const p=await panel('support');
+ assert.match(p.html(),/Atención por WhatsApp/);
+ assert.doesNotMatch(p.html(),/data-tab="(?:services|general|administrators|categories)"|data-save/);
+ p.window.review.select('access');
+ assert.match(p.html(),/grant-form/);assert.doesNotMatch(p.html(),/import-prices/);
+ p.window.review.openEntry('services',0);
+ assert.equal(p.modal(),'');assert.equal(p.saved.length,0);
+ p.window.review.select('administrators');
+ assert.doesNotMatch(p.html(),/admin-email-form/);
+ assert.match(p.html(),/Continúa la conversación/);
+});
+test('todas las colecciones tienen fotografías y explican dónde se muestran',async()=>{
+ const p=await panel();
+ for(const key of ['services','professionals','promotions','gifts','combos']){
+  p.window.review.select(key);
+  p.window.review.openEntry(key);
+  assert.match(p.modal(),/id="draft-photo"/,key);
+  await p.node('#cancel-dialog').handlers.click();
+ }
+ p.window.review.select('gifts');assert.match(p.html(),/compra, entrega, vigencia y uso/);assert.match(p.html(),/href="\.\.\/#\/bonos"/);
+ p.window.review.select('promotions');assert.match(p.html(),/muestran su foto en el inicio y en Promociones/);
+ p.window.review.select('general');assert.match(p.html(),/Más que una cita/);assert.match(p.html(),/seccion=presentacion/);
+ p.window.review.select('administrators');assert.match(p.html(),/value="support"/);assert.match(p.html(),/value="admin"/);
 });

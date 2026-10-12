@@ -1,5 +1,5 @@
-// Solo una clave publicable; las credenciales privadas nunca van en este archivo.
+// Conexión pública de Beauty Day. Los permisos se aplican en Supabase.
 window.BEAUTY_DAY_SUPABASE = {
-  url: 'https://tabmchxpjohtzeahomya.supabase.co',
-  publishableKey: 'sb_publishable_24fJwTqAlzoo01JWLO1Xog_t--E5TAK'
+  url: 'https://vkydsmoiizksoppqerbd.supabase.co',
+  publishableKey: 'sb_publishable_pAGNdfQ_wnQnolKBiQemRw_1_UgypyT'
 };

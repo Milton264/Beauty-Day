@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 import {pgcrypto} from '@electric-sql/pglite/contrib/pgcrypto';
 
@@ -26,7 +26,13 @@ test('Postgres: acceso público, RLS, administradores, revisión y códigos',asy
   `);
   await db.exec(sql('01_schema.sql'));
   await db.exec(sql('02_public_seed.sql'));
+  const migration=readdirSync(new URL('../supabase/migrations/',import.meta.url)).find(n=>n.endsWith('_beauty_roles_validation.sql'));
+  await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
+  // Ejecutar dos veces conserva datos y permisos, sin duplicar objetos.
+  await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
   const results=await db.exec(sql('03_verify.sql'));
+  const roles=await db.exec(sql('04_verify_roles.sql'));
+  assert.ok(roles.some(r=>r.rows?.some(row=>row.resultado?.includes('Rol de atención'))));
   assert.ok(results.some(r=>r.rows?.some(row=>row.resultado?.includes('verificados'))));
   const state=await db.query(`select (select count(*) from auth.users) as users,(select count(*) from beauty_private.admin_emails) as admins,(select count(*) from beauty_private.price_codes) as codes,(select revision from public.beauty_content) as revision`);
   assert.deepEqual(state.rows,[{users:0,admins:0,codes:0,revision:1}]);
