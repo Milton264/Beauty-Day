@@ -14,6 +14,10 @@ Los cambios de portada, contacto, categorías y privacidad quedan pendientes has
 
 Si otra persona guardó mientras editabas, recarga para consultar la versión actual antes de volver a editar. Las fotografías del catálogo son públicas.
 
+## Solicitar una cita sin acceso a precios
+
+La clienta puede enviar su solicitud con servicio, profesional, fecha, hora, nombre, WhatsApp y autorización de privacidad. Los perfiles de redes y la casilla para solicitar precios son opcionales. El mensaje solo declara que sigue las tres redes y solicita el enlace si ella marca esa casilla. Las tarifas continúan bloqueadas hasta que el equipo compruebe los requisitos.
+
 ## Habilitar los precios de una clienta
 
 La clienta sigue a Beauty Day en Instagram, TikTok y Facebook y solicita un servicio por WhatsApp. El equipo comprueba personalmente los seguimientos, comunica el importe y confirma la reserva.

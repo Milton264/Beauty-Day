@@ -1,6 +1,6 @@
 # Beauty Day: revisión de funciones y permisos
 
-Versión 4.1.1 preparada el 13 de octubre de 2026 (UTC), con la base de datos actualizada el 12 de octubre de 2026. Se confirmó acceso a BeautyDay (`eibjseobuvzukpojgnjf`) y al proyecto Beauty Day (`vkydsmoiizksoppqerbd`) de la cuenta de Outlook. La base pública conserva la revisión 4, con 45 servicios, 5 categorías, 4 profesionales, 2 promociones, 3 bonos y 5 combos. La publicación del cliente actualizado en Cloudflare sigue pendiente.
+Versión 4.1.2 preparada el 13 de octubre de 2026 (UTC), con la base de datos actualizada el 12 de octubre de 2026. Se confirmó acceso a BeautyDay (`eibjseobuvzukpojgnjf`) y al proyecto Beauty Day (`vkydsmoiizksoppqerbd`) de la cuenta de Outlook. La base pública conserva la revisión 4, con 45 servicios, 5 categorías, 4 profesionales, 2 promociones, 3 bonos y 5 combos. La publicación del cliente actualizado en Cloudflare sigue pendiente.
 
 ## Correcciones incluidas
 
@@ -20,6 +20,7 @@ Versión 4.1.1 preparada el 13 de octubre de 2026 (UTC), con la base de datos ac
 | Descubre tu ritual | Inicio y páginas de sugerencias | Si se renombra una categoría, la sugerencia vuelve al catálogo en lugar de mostrar una categoría inexistente. |
 | Buscar servicios | Catálogo | Buscar conserva la categoría seleccionada y descarta filtros de categorías eliminadas. |
 | Privacidad | Privacidad, Cookies y Condiciones | Se corrige la referencia del alojamiento a Cloudflare. |
+| Solicitar una cita | Reserva → WhatsApp | Puede enviarse sin perfiles sociales ni declaración de seguimiento. Pedir el enlace de precios es opcional; el mensaje no declara seguimientos que la clienta no haya marcado. |
 | Habilitar precios | Panel del equipo → enlace privado de la clienta | Se mantienen las cuatro comprobaciones, vencimiento de 24 horas, revocación y códigos almacenados como hash. |
 | Equipo y permisos | Panel administrativo | Dos roles diferenciados, comprobados en la base de datos. |
 
@@ -44,7 +45,7 @@ Las fotografías siguen disponibles por su URL pública. El listado de archivos 
 
 ## Pruebas ejecutadas
 
-- `npm test`: 29 pruebas automatizadas aprobadas, incluidas verificaciones transaccionales en Postgres/PGlite. Los scripts SQL verifican múltiples permisos dentro de una sola prueba.
+- `npm test`: 32 pruebas automatizadas aprobadas, incluidas verificaciones transaccionales en Postgres/PGlite. Los scripts SQL verifican múltiples permisos dentro de una sola prueba.
 - Instalación del esquema, carga pública y ejecución de la actualización dos veces: conservan el documento, las revisiones y los permisos.
 - Acceso anónimo, cuenta común, cuenta no confirmada, administración y atención. Atención no puede editar, invitar, consultar el directorio del equipo, leer códigos almacenados ni subir o eliminar fotos.
 - Enlaces válidos, incompletos, vencidos y revocados; cuatro requisitos obligatorios; límite de lectura y máximo de 60 emisiones por persona en una hora. La emisión se serializa por persona.

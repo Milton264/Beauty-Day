@@ -5,18 +5,19 @@ import vm from 'node:vm';
 import content from '../docs/content/site.json' with {type:'json'};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function page(data,{booking}={}){
- const nodes=new Map(),listeners={},saved=new Map([['bd_storage_notice','1']]);
+ const nodes=new Map(),listeners={},saved=new Map([['bd_storage_notice','1']]),opened=[];
  if(booking)saved.set('beautyDayBooking',JSON.stringify(booking));
  const node=key=>{if(!nodes.has(key))nodes.set(key,{innerHTML:'',textContent:'',value:'',disabled:false,handlers:{},classList:{add(){},remove(){},toggle(){}},setAttribute(){},addEventListener(event,fn){this.handlers[event]=fn;}});return nodes.get(key);};
  const buttons=data.services.map(s=>({...node('service:'+s.id),dataset:{service:s.id},classList:{toggle(){}},addEventListener(event,fn){this.handlers[event]=fn;}}));
  const document={querySelector:s=>s==='#featured-rail'?null:node(s),querySelectorAll:s=>s==='[data-service]'&&node('#main').innerHTML.includes('data-service=')?buttons:[],body:{append(){}}};
  const storage={getItem:key=>saved.get(key)||null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)};
  const location={hash:'',pathname:'/',search:''};
- const window={BeautyData:{content:async()=>data},addEventListener:(name,fn)=>listeners[name]=fn,scrollTo(){},matchMedia:()=>({matches:true})};
- const context={window,document,location,sessionStorage:storage,localStorage:storage,URL,URLSearchParams,Date,Number,String,Array,Object,Math,encodeURIComponent,setTimeout(){},clearTimeout(){},setInterval(){}};
+ const window={BeautyData:{content:async()=>data},addEventListener:(name,fn)=>listeners[name]=fn,open:(...args)=>opened.push(args),scrollTo(){},matchMedia:()=>({matches:true})};
+ class FormData{constructor(form){this.values=form.values||{};}get(key){return this.values[key]??null;}}
+ const context={window,document,location,FormData,sessionStorage:storage,localStorage:storage,URL,URLSearchParams,Date,Number,String,Array,Object,Math,encodeURIComponent,setTimeout(){},clearTimeout(){},setInterval(){}};
  for(const script of ['media.js','access-link.js','app.js'])vm.runInNewContext(readFileSync(new URL('../docs/assets/js/'+script,import.meta.url),'utf8'),context);
  await tick();
- return {location,html:()=>node('#main').innerHTML,navigate(route){location.hash=route;listeners.hashchange();},node,buttons,saved};
+ return {location,html:()=>node('#main').innerHTML,navigate(route){location.hash=route;listeners.hashchange();},node,buttons,saved,opened};
 }
 test('todas las imágenes guardadas de promociones, bonos y combos se muestran al cliente',async()=>{
  const data=structuredClone(content);
@@ -127,4 +128,46 @@ test('los correos editables se muestran y no inyectan parámetros en los enlaces
   p.navigate(route);const href=p.html().match(/href="(mailto:[^"]+)"/)[1];
   assert.equal(new URL(href).search,'');assert.match(href,/%3F/);
  }
+});
+
+const bookingFixture=()=>({service:content.services[0].id,professional:'any',date:new Date(Date.now()+2*86400000).toISOString().slice(0,10),time:'15:30'});
+const reservationFields={name:'Clienta de prueba',phone:'3001234567',privacy:'on'};
+function submitReservation(p,fields){
+ const form=p.node('#booking-form');form.values=fields;
+ form.handlers.submit({preventDefault(){},currentTarget:form});
+ return new URL(p.opened.at(-1)[0]).searchParams.get('text');
+}
+
+test('la reserva se envía sin redes ni acceso a precios y conserva los datos obligatorios',async()=>{
+ const p=await page(structuredClone(content),{booking:bookingFixture()});p.navigate('#/reserva/4');
+ assert.match(p.html(),/Ver precios \(opcional\)/);
+ for(const name of ['instagram','tiktok','facebook','socialDeclaration']){
+  const input=p.html().match(new RegExp('<input[^>]*name="'+name+'"[^>]*>'))[0];
+  assert.doesNotMatch(input,/\brequired\b/,name);
+ }
+ for(const name of ['name','phone','privacy'])assert.match(p.html().match(new RegExp('<input[^>]*name="'+name+'"[^>]*>'))[0],/\brequired\b/,name);
+ const message=submitReservation(p,reservationFields);
+ assert.match(message,/Me gustaría solicitar una cita/);assert.match(message,/Nombre: Clienta de prueba/);assert.match(message,/Hora preferida: 15:30/);
+ assert.doesNotMatch(message,/Instagram:|TikTok:|Facebook:|Declaro que sigo|solicito mi enlace privado/);
+ assert.match(p.html(),/Cómo ver precios/);
+ assert.equal(p.saved.has('bd_price_code'),false);assert.equal(p.opened[0][1],'_blank');assert.equal(p.opened[0][2],'noopener');
+});
+
+test('una reserva con un perfil opcional no inventa los demás ni declara seguimientos',async()=>{
+ const p=await page(structuredClone(content),{booking:bookingFixture()});p.navigate('#/reserva/4');
+ const message=submitReservation(p,{...reservationFields,instagram:'@clienta'});
+ assert.match(message,/Instagram: @clienta/);
+ assert.doesNotMatch(message,/TikTok:|Facebook:|Declaro que sigo|solicito mi enlace privado/);
+});
+
+test('el mensaje pide precios solo si la clienta marca la casilla y deja de pedirlos al desmarcarla',async()=>{
+ const p=await page(structuredClone(content),{booking:bookingFixture()});p.navigate('#/reserva/4');
+ const message=submitReservation(p,{...reservationFields,instagram:'@ig',tiktok:'@tt',facebook:'perfil-fb',socialDeclaration:'on'});
+ assert.match(message,/Instagram: @ig/);assert.match(message,/TikTok: @tt/);assert.match(message,/Facebook: perfil-fb/);
+ assert.match(message,/Declaro que sigo las tres cuentas y solicito mi enlace privado/);
+ assert.equal(JSON.parse(p.saved.get('beautyDayBooking')).socialDeclaration,true);
+ p.navigate('#/reserva/4');assert.match(p.html(),/name="socialDeclaration" checked/);
+ const unchecked=submitReservation(p,reservationFields);
+ assert.doesNotMatch(unchecked,/Declaro que sigo|solicito mi enlace privado/);
+ assert.equal(JSON.parse(p.saved.get('beautyDayBooking')).socialDeclaration,false);
 });
