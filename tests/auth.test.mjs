@@ -2,15 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import {createAuthStorage,createPanelSession,PANEL_MAX_MS} from '../src/panel-session.js';
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
 function adapter(){
- let signInError={code:'email_not_confirmed'},resendError=null,resendArgs;
+ let signInError={code:'email_not_confirmed'},resendError=null,resendArgs;const rpcCalls=[],signOutScopes=[];
  const window={BEAUTY_DAY_SUPABASE:{url:'https://test.supabase.co',publishableKey:'sb_publishable_test'}};
- const db={auth:{signInWithPassword:async()=>({error:signInError,data:{session:{}}}),resend:async args=>{resendArgs=args;return {error:resendError,data:{}};}}};
- const source=readFileSync(new URL('../src/data.js',import.meta.url),'utf8').replace(/^import .*\n/,'');
- vm.runInNewContext(source,{window,createClient:()=>db,URL,location:{href:'https://salon.test/Beauty-Day/admin/'},sessionStorage:{getItem(){return null;},setItem(){},removeItem(){}}});
- return {api:window.BeautyData,signInError(value){signInError=value;},resendError(value){resendError=value;},resendArgs:()=>resendArgs};
+ const db={rpc:async name=>{rpcCalls.push(name);return {data:{role:'admin',expiresAt:Date.now()+PANEL_MAX_MS}};},auth:{signInWithPassword:async()=>({error:signInError,data:{session:{}}}),updateUser:async()=>({data:{user:{}}}),signOut:async args=>{signOutScopes.push(args.scope);return {};},resend:async args=>{resendArgs=args;return {error:resendError,data:{}};}}};
+ const source=readFileSync(new URL('../src/data.js',import.meta.url),'utf8').replace(/^import .*\n/gm,'');
+ vm.runInNewContext(source,{window,createClient:()=>db,createAuthStorage,createPanelSession,setInterval(){return 1;},clearInterval(){},URL,location:{href:'https://salon.test/Beauty-Day/admin/'},sessionStorage:{getItem(){return null;},setItem(){},removeItem(){}}});
+ return {api:window.BeautyData,signInError(value){signInError=value;},resendError(value){resendError=value;},resendArgs:()=>resendArgs,rpcCalls,signOutScopes};
 }
 test('el inicio de sesión distingue un correo sin confirmar de credenciales incorrectas',async()=>{
  const a=adapter();
@@ -25,6 +26,19 @@ test('el reenvío usa confirmación de registro y conserva el destino del panel'
  assert.equal(a.resendArgs().options.emailRedirectTo,'https://salon.test/Beauty-Day/admin/');
  a.resendError({code:'over_email_send_rate_limit',message:'rate limit'});
  await assert.rejects(a.api.resendConfirmation('admin@example.invalid'),/límite de envíos/);
+});
+
+test('las operaciones privadas requieren una sesión del panel aprobada por el servidor',async()=>{
+ const a=adapter();await assert.rejects(a.api.adminContent(),{code:'BEAUTY_SESSION_EXPIRED'});assert.equal(a.rpcCalls.length,0);
+ a.signInError(null);await a.api.signIn('admin@example.invalid','test-only-password');
+ assert.equal(a.rpcCalls[0],'beauty_start_panel_session');await a.api.adminContent();assert.equal(a.rpcCalls[1],'beauty_admin_read');
+ await a.api.signOut();assert.ok(a.rpcCalls.includes('beauty_end_panel_session'));
+ await assert.rejects(a.api.adminContent(),{code:'BEAUTY_SESSION_EXPIRED'});
+});
+
+test('actualizar la contraseña retira las otras sesiones antes de abrir el panel',async()=>{
+ const a=adapter();await a.api.changePassword('test-only-password');
+ assert.deepEqual(a.signOutScopes,['others']);assert.equal(a.rpcCalls[0],'beauty_start_panel_session');
 });
 test('el panel explica la confirmación, conserva el correo y reenvía solo al solicitarlo',async()=>{
  let html='',resends=0;

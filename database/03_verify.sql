@@ -12,6 +12,9 @@ insert into beauty_private.admin_emails(email)
  select 'beauty-test-admin-'||admin_id||'@example.invalid' from beauty_test_state union all
  select 'beauty-test-unconfirmed-'||unconfirmed_id||'@example.invalid' from beauty_test_state;
 
+insert into auth.sessions(id,user_id,created_at,updated_at) select id,id,now(),now() from auth.users where email like 'beauty-test-%@example.invalid';
+insert into beauty_private.panel_sessions(session_id,user_id,expires_at) select id,id,now()+interval '8 hours' from auth.users where email like 'beauty-test-%@example.invalid';
+
 set local role anon;
 do $$begin
  if not exists(select 1 from public.beauty_content) then raise exception 'Fallo: catálogo público inaccesible';end if;
@@ -23,7 +26,7 @@ do $$begin
  begin update public.beauty_content set revision=revision+1;raise exception 'Fallo: visitante puede editar';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select set_config('request.jwt.claim.sub',visitor_id::text,true) from beauty_test_state;
+select set_config('request.jwt.claim.sub',visitor_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',visitor_id,'session_id',visitor_id)::text,true) from beauty_test_state;
 set local role authenticated;
 do $$begin
  if beauty_private.is_admin() then raise exception 'Fallo: cuenta común autorizada';end if;
@@ -37,15 +40,16 @@ do $$begin
  if public.beauty_read_prices('invalido') ? 'prices' then raise exception 'Fallo: código inválido muestra precios';end if;
 end $$;
 reset role;
-select set_config('request.jwt.claim.sub',unconfirmed_id::text,true) from beauty_test_state;
+select set_config('request.jwt.claim.sub',unconfirmed_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',unconfirmed_id,'session_id',unconfirmed_id)::text,true) from beauty_test_state;
 set local role authenticated;
 do $$begin if beauty_private.is_admin() then raise exception 'Fallo: cuenta sin confirmar autorizada';end if;end $$;
 reset role;
-select set_config('request.jwt.claim.sub',admin_id::text,true) from beauty_test_state;
+select set_config('request.jwt.claim.sub',admin_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',admin_id,'session_id',admin_id)::text,true) from beauty_test_state;
 set local role authenticated;
 do $$declare r jsonb;c jsonb;begin
  if not beauty_private.is_admin() then raise exception 'Fallo: administrador sin permiso';end if;
  insert into storage.objects(bucket_id,name) values('beauty-images','test-allowed.jpg');
+ if not exists(select 1 from storage.objects where name='test-allowed.jpg') then raise exception 'Fallo: administración no lista sus fotos';end if;
  if jsonb_array_length(public.beauty_list_admins())<2 then raise exception 'Fallo: no lista administradores';end if;
  r=public.beauty_manage_admin(' Beauty-Test-Invite@Example.Invalid ',true);
  if r->>'saved'<>'true' then raise exception 'Fallo: no autoriza un correo nuevo';end if;
@@ -75,10 +79,13 @@ select set_config('request.jwt.claim.sub','',true);
 set local role anon;
 do $$begin
  if jsonb_array_length(public.beauty_read_prices((select code from beauty_test_state))->'prices')<1 then raise exception 'Fallo: visitante con código no lee tarifas';end if;
- if not exists(select 1 from storage.objects where name='test-allowed.jpg') then raise exception 'Fallo: foto pública no visible';end if;
+ begin
+  if exists(select 1 from storage.objects where name='test-allowed.jpg') then raise exception 'Fallo: visitante lista archivos de Storage';end if;
+ exception when insufficient_privilege then null;
+ end;
 end $$;
 reset role;
-select set_config('request.jwt.claim.sub',admin_id::text,true) from beauty_test_state;
+select set_config('request.jwt.claim.sub',admin_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',admin_id,'session_id',admin_id)::text,true) from beauty_test_state;
 set local role authenticated;
 select public.beauty_revoke_code(code) from beauty_test_state;
 reset role;
@@ -97,7 +104,7 @@ end $$;
 reset role;
 -- La revocación del administrador invalida el permiso sin esperar a otro JWT.
 update beauty_private.admin_emails set active=false where email='beauty-test-admin-'||(select admin_id from beauty_test_state)||'@example.invalid';
-select set_config('request.jwt.claim.sub',admin_id::text,true) from beauty_test_state;
+select set_config('request.jwt.claim.sub',admin_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',admin_id,'session_id',admin_id)::text,true) from beauty_test_state;
 set local role authenticated;
 do $$begin if beauty_private.is_admin() then raise exception 'Fallo: administrador desactivado conserva acceso';end if;end $$;
 reset role;

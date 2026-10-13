@@ -14,7 +14,8 @@ En SQL Editor ejecuta, en orden:
 
 1. `database/01_schema.sql` una sola vez en el proyecto nuevo.
 2. `database/02_public_seed.sql` para importar el catálogo público sin precios.
-3. Autoriza tu primer correo administrativo:
+3. Ejecuta los archivos SQL de `supabase/migrations/`, en el orden de sus nombres.
+4. Autoriza tu primer correo administrativo:
 
 ```sql
 insert into beauty_private.admin_emails(email)
@@ -23,12 +24,14 @@ values (lower('TU_CORREO_ADMINISTRADOR'));
 
 No escribas contraseñas en esta tabla ni en un archivo del proyecto. Supabase Auth las gestiona. Mantén `beauty_private` fuera de los esquemas expuestos por Data API; conserva únicamente los esquemas públicos habituales.
 
+Para actualizar una base existente, ejecuta únicamente las migraciones pendientes. No vuelvas a crear el esquema ni a cargar el catálogo inicial. La organización BeautyDay de Outlook ya recibió las dos migraciones del 12 de octubre de 2026.
+
 ## 3. Configurar el correo administrativo
 
 En **Authentication → URL Configuration** usa:
 
-- Site URL: `https://milton264.github.io/Beauty-Day/admin/`
-- Redirect URLs: `https://milton264.github.io/Beauty-Day/admin/`
+- Site URL: `https://soybeautyday.shop/admin/`
+- Redirect URLs: `https://soybeautyday.shop/admin/`
 
 En **Authentication → Providers → Email**, mantén habilitado el acceso con correo y la confirmación de correo. Configura un proveedor SMTP propio para enviar confirmaciones y recuperación de contraseña a los administradores: el servicio de correo incluido por Supabase tiene restricciones sobre destinatarios y frecuencia. Conserva la confirmación activada.
 
@@ -47,11 +50,11 @@ window.BEAUTY_DAY_SUPABASE = {
 };
 ```
 
-La clave publishable es pública. Los permisos están en RLS y las funciones de la base de datos. Nunca pongas una clave secreta, `service_role` o contraseña en la web. Publica estos cambios en GitHub Pages usando la rama `main` y carpeta `/docs`.
+La clave publishable es pública. Los permisos están en RLS y las funciones de la base de datos. Nunca pongas una clave secreta, `service_role` o contraseña en la web. Publica únicamente el contenido de `docs/` en la aplicación actual de Cloudflare. El ZIP incluye los archivos compilados y `index.html` en la raíz.
 
 ## 5. Activar las tarifas y verificar
 
-Entra a [Administración](https://milton264.github.io/Beauty-Day/admin/) con la cuenta confirmada. Completa los precios en Servicios y tarifas o importa el `site.json` de la copia anterior desde Habilitar precios. La importación copia únicamente las tarifas coincidentes: guarda después. No subas ese JSON con los precios al repositorio público.
+Entra a [Administración](https://soybeautyday.shop/admin/) con una cuenta confirmada y el rol de administración completa. Completa los precios en Servicios y tarifas o importa el `site.json` de la copia anterior desde Habilitar precios. La importación copia únicamente las tarifas coincidentes: guarda después. No subas ese JSON con los precios al repositorio público.
 
 Comprueba que:
 
@@ -61,4 +64,12 @@ Comprueba que:
 - Con un código vigente se leen los precios; al revocarlo o vencer deja de funcionar.
 - Guardar una edición actualiza la web al recargar; una revisión antigua devuelve un conflicto.
 
-`database/03_verify.sql` realiza estas comprobaciones de la base de datos con usuarios de prueba y ROLLBACK, sin dejar cuentas o códigos de prueba. Ejecútalo como propietario desde SQL Editor después de importar el contenido. También ejecuta los asesores de seguridad de Supabase.
+`database/03_verify.sql`, `database/04_verify_roles.sql` y `database/05_verify_sessions.sql` comprueban la base con usuarios de prueba y ROLLBACK, sin dejar cuentas, fotografías ni códigos de prueba. Ejecútalos como propietario desde SQL Editor después de aplicar las migraciones. El segundo verifica también el aislamiento de atención por WhatsApp. Las fotos siguen visibles por su URL pública; únicamente administración puede listar, subir, reemplazar o retirar archivos. También ejecuta los asesores de seguridad de Supabase.
+
+## Sesiones del panel (4.2.0)
+
+La migración `20261013062709_beauty_panel_sessions.sql` ya se aplicó y la prueba `05_verify_sessions.sql` pasó en el proyecto de Outlook el 13 de octubre de 2026. No debe repetirse el esquema ni la carga inicial. El cliente 4.2.0 requiere esta migración. El panel anterior no registra la nueva sesión y deberá reemplazarse por el ZIP actualizado.
+
+Los tokens de acceso y renovación solo se guardan en memoria. El verificador de confirmación o recuperación puede cruzar pestañas durante 15 minutos; por sí solo no concede acceso. Las operaciones privadas y las políticas de Storage comprueban la identidad, la cuenta confirmada, el miembro activo y una sesión de Auth vinculada a una sesión vigente del panel. Hay 15 minutos de inactividad y una duración máxima de 8 horas. Un JWT renovado no reinicia los plazos y una sesión retirada no puede reabrirse con el mismo token.
+
+En el proveedor Email del proyecto de Outlook se guardó un mínimo de 12 caracteres para nuevas contraseñas y se activó Secure password change. No se cambió la contraseña existente. Se conserva la confirmación de correo. SMTP sigue fuera de esta actualización por indicación del usuario.

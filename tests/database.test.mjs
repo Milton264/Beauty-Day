@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 import {pgcrypto} from '@electric-sql/pglite/contrib/pgcrypto';
 
@@ -15,9 +15,11 @@ test('Postgres: acceso público, RLS, administradores, revisión y códigos',asy
    create role anon;create role authenticated;
    create schema auth;create schema storage;create schema extensions;
    create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
+   create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id),created_at timestamptz not null default now(),updated_at timestamptz default now());
+   create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;
    create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
    grant usage on schema auth to anon,authenticated;
-   grant execute on function auth.uid() to anon,authenticated;
+   grant execute on function auth.uid(),auth.jwt() to anon,authenticated;
    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
    create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);
    alter table storage.objects enable row level security;
@@ -26,7 +28,15 @@ test('Postgres: acceso público, RLS, administradores, revisión y códigos',asy
   `);
   await db.exec(sql('01_schema.sql'));
   await db.exec(sql('02_public_seed.sql'));
+  const migrations=readdirSync(new URL('../supabase/migrations/',import.meta.url)).filter(n=>n.endsWith('.sql')).sort();
+  for(const migration of migrations) await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
+  // Ejecutar dos veces conserva datos y permisos, sin duplicar objetos.
+  for(const migration of migrations) await db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
   const results=await db.exec(sql('03_verify.sql'));
+  const roles=await db.exec(sql('04_verify_roles.sql'));
+  const sessions=await db.exec(sql('05_verify_sessions.sql'));
+  assert.ok(sessions.some(r=>r.rows?.some(row=>row.resultado?.includes('Sesiones'))));
+  assert.ok(roles.some(r=>r.rows?.some(row=>row.resultado?.includes('Rol de atención'))));
   assert.ok(results.some(r=>r.rows?.some(row=>row.resultado?.includes('verificados'))));
   const state=await db.query(`select (select count(*) from auth.users) as users,(select count(*) from beauty_private.admin_emails) as admins,(select count(*) from beauty_private.price_codes) as codes,(select revision from public.beauty_content) as revision`);
   assert.deepEqual(state.rows,[{users:0,admins:0,codes:0,revision:1}]);
