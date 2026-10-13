@@ -14,6 +14,9 @@ insert into beauty_private.admin_emails(email,role)
  select 'role-test-other-'||other_id||'@example.invalid','support' from beauty_role_test union all
  select 'role-test-unconfirmed-'||unconfirmed_id||'@example.invalid','support' from beauty_role_test;
 
+insert into auth.sessions(id,user_id,created_at,updated_at) select id,id,now(),now() from auth.users where email like 'role-test-%@example.invalid';
+insert into beauty_private.panel_sessions(session_id,user_id,expires_at) select id,id,now()+interval '8 hours' from auth.users where email like 'role-test-%@example.invalid';
+
 set local role anon;
 do $$begin
  begin perform public.beauty_panel_session();raise exception 'Fallo: panel público';exception when insufficient_privilege then null;end;
@@ -22,7 +25,7 @@ do $$begin
 end $$;
 reset role;
 
-select set_config('request.jwt.claim.sub',admin_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',admin_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',admin_id,'session_id',admin_id)::text,true) from beauty_role_test;
 set local role authenticated;
 do $$declare r jsonb;begin
  if public.beauty_panel_session()->>'role'<>'admin' then raise exception 'Fallo: rol administrativo';end if;
@@ -39,7 +42,7 @@ do $$declare r jsonb;begin
 end $$;
 reset role;
 
-select set_config('request.jwt.claim.sub',support_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',support_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',support_id,'session_id',support_id)::text,true) from beauty_role_test;
 set local role authenticated;
 do $$declare r jsonb;n integer;begin
  if beauty_private.is_admin() or not beauty_private.can_issue_prices() then raise exception 'Fallo: permisos de atención';end if;
@@ -70,11 +73,11 @@ do $$declare r jsonb;n integer;begin
 end $$;
 reset role;
 
-select set_config('request.jwt.claim.sub',other_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',other_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',other_id,'session_id',other_id)::text,true) from beauty_role_test;
 set local role authenticated;
 update beauty_role_test set other_code=public.beauty_issue_code('{"instagram":true,"tiktok":true,"facebook":true,"reservation":true}')->>'code';
 reset role;
-select set_config('request.jwt.claim.sub',support_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',support_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',support_id,'session_id',support_id)::text,true) from beauty_role_test;
 set local role authenticated;
 do $$begin
  begin perform public.beauty_revoke_code((select other_code from beauty_role_test));raise exception 'Fallo: atención retira enlace ajeno';exception when insufficient_privilege then null;end;
@@ -82,12 +85,12 @@ do $$begin
  if not(public.beauty_read_prices((select own_code from beauty_role_test)) ? 'error') then raise exception 'Fallo: revocación propia';end if;
 end $$;
 reset role;
-select set_config('request.jwt.claim.sub',admin_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',admin_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',admin_id,'session_id',admin_id)::text,true) from beauty_role_test;
 set local role authenticated;
 select public.beauty_revoke_code(other_code) from beauty_role_test;
 reset role;
 
-select set_config('request.jwt.claim.sub',unconfirmed_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',unconfirmed_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',unconfirmed_id,'session_id',unconfirmed_id)::text,true) from beauty_role_test;
 set local role authenticated;
 do $$begin
  if beauty_private.can_issue_prices() then raise exception 'Fallo: cuenta sin confirmar tiene permiso';end if;
@@ -97,7 +100,7 @@ reset role;
 
 -- Revocar el rol afecta la siguiente petición sin renovar el JWT.
 update beauty_private.admin_emails set active=false where email='role-test-support-'||(select support_id from beauty_role_test)||'@example.invalid';
-select set_config('request.jwt.claim.sub',support_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',support_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',support_id,'session_id',support_id)::text,true) from beauty_role_test;
 set local role authenticated;
 do $$begin
  if beauty_private.can_issue_prices() then raise exception 'Fallo: acceso desactivado conserva permiso';end if;
@@ -105,7 +108,7 @@ do $$begin
 end $$;
 reset role;
 update beauty_private.admin_emails set active=true where email='role-test-support-'||(select support_id from beauty_role_test)||'@example.invalid';
-select set_config('request.jwt.claim.sub',support_id::text,true) from beauty_role_test;
+select set_config('request.jwt.claim.sub',support_id::text,true),set_config('request.jwt.claims',jsonb_build_object('sub',support_id,'session_id',support_id)::text,true) from beauty_role_test;
 set local role authenticated;
 do $$declare i integer;begin
  for i in 1..59 loop perform public.beauty_issue_code('{"instagram":true,"tiktok":true,"facebook":true,"reservation":true}');end loop;

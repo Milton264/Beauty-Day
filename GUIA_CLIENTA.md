@@ -2,6 +2,8 @@
 
 Abre el panel e ingresa tu correo autorizado y contraseña. Cada persona del equipo tiene su propia cuenta. Si recibiste autorización para registrarte, usa **Crear mi acceso**, confirma tu correo y luego inicia sesión. Si el correo sigue pendiente, abre **Confirmar mi correo** para solicitar otro enlace y revisa también el correo no deseado. Autorizar un correo no confirma automáticamente la cuenta.
 
+Por seguridad, la sesión se conserva solo en la página abierta: al recargar o salir tendrás que ingresar nuevamente. Se cierra tras 15 minutos sin actividad y dura como máximo 8 horas. Guarda los cambios antes de salir. Cerrar sesión también retira el acceso de esa sesión en la base de datos.
+
 El panel abre en **Inicio**, con accesos a las tareas frecuentes. En un teléfono, usa el selector **Ir a** para cambiar de sección.
 
 1. En **Servicios y tarifas**, busca por nombre o filtra por categoría. Pulsa **Editar** para abrir un solo servicio. **Guardar servicio** publica ese cambio; **Cancelar** descarta la edición. Los precios permanecen privados.

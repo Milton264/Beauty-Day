@@ -1,6 +1,6 @@
 # Beauty Day: revisión de funciones y permisos
 
-Versión 4.1.2 preparada el 13 de octubre de 2026 (UTC), con la base de datos actualizada el 12 de octubre de 2026. Se confirmó acceso a BeautyDay (`eibjseobuvzukpojgnjf`) y al proyecto Beauty Day (`vkydsmoiizksoppqerbd`) de la cuenta de Outlook. La base pública conserva la revisión 4, con 45 servicios, 5 categorías, 4 profesionales, 2 promociones, 3 bonos y 5 combos. La publicación del cliente actualizado en Cloudflare sigue pendiente.
+Versión 4.2.0 preparada el 13 de octubre de 2026 (UTC), con la base de datos actualizada el 13 de octubre de 2026. Se confirmó acceso a BeautyDay (`eibjseobuvzukpojgnjf`) y al proyecto Beauty Day (`vkydsmoiizksoppqerbd`) de la cuenta de Outlook. La base pública conserva la revisión 4, con 45 servicios, 5 categorías, 4 profesionales, 2 promociones, 3 bonos y 5 combos. La publicación del cliente actualizado en Cloudflare sigue pendiente.
 
 ## Correcciones incluidas
 
@@ -45,7 +45,7 @@ Las fotografías siguen disponibles por su URL pública. El listado de archivos 
 
 ## Pruebas ejecutadas
 
-- `npm test`: 32 pruebas automatizadas aprobadas, incluidas verificaciones transaccionales en Postgres/PGlite. Los scripts SQL verifican múltiples permisos dentro de una sola prueba.
+- `npm test`: 45 pruebas automatizadas aprobadas, incluidas verificaciones transaccionales en Postgres/PGlite. Los scripts SQL verifican múltiples permisos dentro de una sola prueba.
 - Instalación del esquema, carga pública y ejecución de la actualización dos veces: conservan el documento, las revisiones y los permisos.
 - Acceso anónimo, cuenta común, cuenta no confirmada, administración y atención. Atención no puede editar, invitar, consultar el directorio del equipo, leer códigos almacenados ni subir o eliminar fotos.
 - Enlaces válidos, incompletos, vencidos y revocados; cuatro requisitos obligatorios; límite de lectura y máximo de 60 emisiones por persona en una hora. La emisión se serializa por persona.
@@ -77,7 +77,32 @@ En la base publicada, con la clave pública y sin sesión, se verificaron estas 
 
 El documento público contiene cero tarifas numéricas. La foto guardada de las promociones responde 200 desde Supabase con tipo `image/jpeg`, incluso después de restringir el listado de archivos; el fallo detectado estaba en la tarjeta de la web.
 
-El asesor de seguridad mostró cero errores. Se corrigió la advertencia «Public Bucket Allows Listing». Queda «Leaked Password Protection Disabled»: esa función está limitada al plan Pro o superior, según la [documentación de Supabase](https://supabase.com/docs/guides/auth/password-security). El proyecto continúa en el plan gratuito.
+El asesor de seguridad se volvió a ejecutar tras la migración de sesiones y mostró cero errores. Se revisaron las cuatro observaciones informativas de RLS sin políticas en tablas de beauty_private: son intencionadas, sin concesiones de lectura directa y accesibles únicamente a través de las funciones privadas autorizadas. Se corrigió la advertencia «Public Bucket Allows Listing». Queda «Leaked Password Protection Disabled»: esa función está limitada al plan Pro o superior, según la [documentación de Supabase](https://supabase.com/docs/guides/auth/password-security). El proyecto continúa en el plan gratuito.
+
+## Revisión adicional de sesiones (13 de octubre)
+
+Se confirmó que la versión anterior guardaba el login en sessionStorage y permitía renovarlo sin límite de inactividad. Además, la autorización comprobaba a la persona activa, pero no la vigencia de su sesión de Auth. El cierre de Auth por sí solo no invalida un JWT firmado antes de su vencimiento.
+
+Cambios aplicados y probados:
+
+- Los tokens de acceso y renovación se conservan solo en memoria. Se retiran al salir o recargar. Se borran las entradas de sesión que haya dejado la versión anterior.
+- El panel se cierra tras 15 minutos sin actividad y dura como máximo 8 horas. La renovación automática de tokens y los eventos sintéticos no cuentan como actividad.
+- Las funciones privadas y RLS comprueban que el session_id pertenece a esa persona, sigue presente en auth.sessions y tiene una sesión privada vigente, sin revocación. El mismo token no puede reiniciar una sesión vencida o retirada.
+- Las tablas de sesión no están expuestas por la API ni tienen permisos de lectura directa para visitantes o equipo. Los ayudantes privilegiados permanecen en el esquema privado y las funciones públicas usan SECURITY INVOKER.
+- Cerrar sesión retira primero la sesión privada. Si la conexión falla, el panel se cierra y borra los tokens locales, e informa que no se pudo confirmar el cierre remoto. Al abandonar la página se intenta retirar la sesión; el vencimiento obligatorio en la base sigue protegiendo si el navegador interrumpe el envío.
+- Las respuestas privadas pendientes no vuelven a abrir el editor después del cierre. Se limpian tarifas, borradores, enlaces preparados, filtros y referencias a formularios anteriores.
+- El flujo de recuperación conserva únicamente un verificador temporal de hasta 15 minutos entre pestañas, sin guardar la sesión. Actualizar la contraseña solicita el cierre de las otras sesiones de Auth.
+- En el proveedor Email de Supabase se guardó un mínimo de 12 caracteres para nuevas contraseñas y se activó Secure password change. La contraseña existente no se cambió. Se verificó la opción activada al volver a abrir el proveedor.
+- Se comprobaron los límites reales de Auth: 30 registros o inicios de sesión por IP en 5 minutos, 30 verificaciones de token por IP en 5 minutos y reenvío de IP desactivado. Se conservaron estos límites.
+- Los retornos de Auth se procesan solo en /admin/. Se mantienen la confirmación de correo y la prohibición de inicios anónimos.
+
+La migración `20261013062709_beauty_panel_sessions.sql` se aplicó en el proyecto real. `05_verify_sessions.sql` pasó en SQL Editor con ROLLBACK: acceso anónimo, arranque de sesión, inactividad, duración máxima, revocación del panel y de Auth, JWT renovado, sesión de otra persona, metadatos manipulados y aislamiento de atención. Se conserva la prueba previa de roles del 12 de octubre; sus fixtures se actualizaron para el nuevo contrato y se probaron junto al esquema en Postgres/PGlite.
+
+La comparación antes y después conserva revisión 4, 45 tarifas, una cuenta, un miembro y un enlace. El hash del documento permanece `9efde73891b7bb31878e26a8f3c7e0f2` y el hash de tarifas con el mismo formato permanece `f0c7a4cbbf49f2ef3810631f8b63e60f`. No quedaron cuentas ni sesiones de prueba; la tabla nueva tiene cero registros hasta que alguien abra el panel actualizado.
+
+Se comprobaron de nuevo por la API real: el catálogo público responde 200 sin tarifas numéricas; iniciar, renovar o cerrar una sesión privada y abrir el panel sin autenticación responden 401/42501; el esquema de sesiones privadas responde 406/PGRST106. La nueva versión del cliente requiere esta migración ya instalada: el panel anterior no registra una sesión vigente.
+
+La auditoría cubre estos controles y escenarios; no equivale a una garantía de ausencia de vulnerabilidades, una prueba de penetración independiente ni validación visual real de la nueva publicación. El análisis de dependencias de producción volvió a dar cero vulnerabilidades conocidas.
 
 ## Confirmación y recuperación
 
@@ -87,7 +112,7 @@ Por indicación del usuario, el correo y SMTP se dejan como están; no se crearo
 
 ## Pendientes de verificación real
 
-La base de Outlook ya está actualizada y verificada. La versión nueva del cliente todavía no está publicada en el dominio: el usuario indicó que él realizará la carga del ZIP en Cloudflare.
+La base de Outlook ya está actualizada y verificada, incluida la migración de sesiones del 13 de octubre. La versión nueva del cliente todavía no está publicada en el dominio: el usuario indicó que él realizará la carga del ZIP en Cloudflare.
 
 La revisión visual a distintos anchos y la subida real de nuevas fotos deben terminarse después de publicar el ZIP. Los escenarios de contenido máximo prueban generación y comportamiento; no equivalen a una comprobación visual en dispositivos reales. La entrega real de correos de confirmación y recuperación no se ha comprobado. La configuración de SMTP queda aplazada por indicación del usuario.
 
@@ -97,8 +122,9 @@ El comando de historial local de Supabase no pudo conectarse porque no hay una i
 
 1. Ya completado: `supabase/migrations/20261012182006_beauty_roles_validation.sql` y `supabase/migrations/20261012223152_beauty_storage_listing.sql` en el proyecto de Outlook. Conservan catálogo, tarifas, fotos y personas autorizadas.
 2. Ya completado: `database/03_verify.sql` y `database/04_verify_roles.sql` en el proyecto real. Ambas terminaron con `rollback` y no conservaron usuarios ni cambios de prueba.
-3. Publicar únicamente el contenido de `docs/` en el Worker de archivos estáticos de Cloudflare mediante el ZIP actualizado. No subir SQL, tests ni código de desarrollo a la carpeta pública.
-4. Comprobar en vivo cada sección, guardar una foto temporal y restaurar el contenido anterior, probar una cuenta de atención y retirar el enlace de prueba. El usuario dejó la configuración de correo fuera de esta actualización; la confirmación y recuperación para nuevas cuentas no se presentan como verificadas.
+3. Ya completado: `20261013062709_beauty_panel_sessions.sql` y `database/05_verify_sessions.sql` en el proyecto real, con los datos de prueba revertidos.
+4. Publicar únicamente el contenido de `docs/` en el Worker de archivos estáticos de Cloudflare mediante el ZIP actualizado. No subir SQL, tests ni código de desarrollo a la carpeta pública.
+5. Comprobar en vivo cada sección, guardar una foto temporal y restaurar el contenido anterior, probar una cuenta de atención y retirar el enlace de prueba. El usuario dejó la configuración de correo fuera de esta actualización; la confirmación y recuperación para nuevas cuentas no se presentan como verificadas.
 
 Para una instalación nueva, ejecutar primero `database/01_schema.sql` y `database/02_public_seed.sql`, y después los archivos SQL de `supabase/migrations/` en orden. No volver a ejecutar los archivos de creación o carga inicial sobre la base de producción.
 

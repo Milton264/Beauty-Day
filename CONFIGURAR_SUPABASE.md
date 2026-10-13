@@ -64,4 +64,12 @@ Comprueba que:
 - Con un código vigente se leen los precios; al revocarlo o vencer deja de funcionar.
 - Guardar una edición actualiza la web al recargar; una revisión antigua devuelve un conflicto.
 
-`database/03_verify.sql` y `database/04_verify_roles.sql` comprueban la base con usuarios de prueba y ROLLBACK, sin dejar cuentas, fotografías ni códigos de prueba. Ejecútalos como propietario desde SQL Editor después de aplicar las migraciones. El segundo verifica también el aislamiento de atención por WhatsApp. Las fotos siguen visibles por su URL pública; únicamente administración puede listar, subir, reemplazar o retirar archivos. También ejecuta los asesores de seguridad de Supabase.
+`database/03_verify.sql`, `database/04_verify_roles.sql` y `database/05_verify_sessions.sql` comprueban la base con usuarios de prueba y ROLLBACK, sin dejar cuentas, fotografías ni códigos de prueba. Ejecútalos como propietario desde SQL Editor después de aplicar las migraciones. El segundo verifica también el aislamiento de atención por WhatsApp. Las fotos siguen visibles por su URL pública; únicamente administración puede listar, subir, reemplazar o retirar archivos. También ejecuta los asesores de seguridad de Supabase.
+
+## Sesiones del panel (4.2.0)
+
+La migración `20261013062709_beauty_panel_sessions.sql` ya se aplicó y la prueba `05_verify_sessions.sql` pasó en el proyecto de Outlook el 13 de octubre de 2026. No debe repetirse el esquema ni la carga inicial. El cliente 4.2.0 requiere esta migración. El panel anterior no registra la nueva sesión y deberá reemplazarse por el ZIP actualizado.
+
+Los tokens de acceso y renovación solo se guardan en memoria. El verificador de confirmación o recuperación puede cruzar pestañas durante 15 minutos; por sí solo no concede acceso. Las operaciones privadas y las políticas de Storage comprueban la identidad, la cuenta confirmada, el miembro activo y una sesión de Auth vinculada a una sesión vigente del panel. Hay 15 minutos de inactividad y una duración máxima de 8 horas. Un JWT renovado no reinicia los plazos y una sesión retirada no puede reabrirse con el mismo token.
+
+En el proveedor Email del proyecto de Outlook se guardó un mínimo de 12 caracteres para nuevas contraseñas y se activó Secure password change. No se cambió la contraseña existente. Se conserva la confirmación de correo. SMTP sigue fuera de esta actualización por indicación del usuario.

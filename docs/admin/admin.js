@@ -3,7 +3,8 @@
   const root=document.querySelector('#admin-root');
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const backend=window.BeautyData;
-  let data=null,sha='',tab='home',dirty=false,busy=false,pricesConfigured=false,panelRole='';
+  let data=null,sha='',tab='home',dirty=false,busy=false,pricesConfigured=false,panelRole='',sessionEpoch=0;
+  function clearPanel(message='La sesión se cerró. Vuelve a ingresar para continuar.'){sessionEpoch++;data=null;sha='';panelRole='';dirty=false;busy=false;pricesConfigured=false;lastGrant=null;lastFocus=null;dialogDraft=null;dialogBusy=false;dialogKey='';dialogIndex=-1;serviceSearch='';serviceCategory='';login(message);}
   const get=path=>path.split('.').reduce((obj,key)=>obj?.[key],data);
   const set=(path,value)=>{const keys=path.split('.');let obj=data;keys.slice(0,-1).forEach(key=>obj=obj[key]);obj[keys.at(-1)]=value;dirty=true;status('Cambios sin guardar.');};
   const status=(message,error=false)=>{
@@ -35,7 +36,7 @@
   function login(message='',mode='login',email='',success=false) {
     const signup=mode==='signup',recover=mode==='recover',confirmation=mode==='confirmation';
     const title=signup?'Crea tu acceso.':recover?'Recupera tu acceso.':confirmation?'Confirma tu correo.':'Bienvenida de nuevo.';
-    const description=signup?'Autorizar tu correo te permite registrarte. Crea tu contraseña y confirma el correo para entrar.':recover?'Te enviaremos un enlace para elegir una nueva contraseña.':confirmation?'Abre el mensaje de confirmación de Beauty Day en tu correo. Si no lo encuentras, revisa el correo no deseado o solicita otro enlace.':'Ingresa tu correo y contraseña.';
+    const description=signup?'Autorizar tu correo te permite registrarte. Crea tu contraseña y confirma el correo para entrar.':recover?'Te enviaremos un enlace para elegir una nueva contraseña.':confirmation?'Abre el mensaje de confirmación de Beauty Day en tu correo. Si no lo encuentras, revisa el correo no deseado o solicita otro enlace.':'Ingresa tu correo y contraseña. La sesión se cierra al recargar o salir del panel y después de 15 minutos sin actividad.';
     const action=signup?'Crear acceso':recover?'Enviar enlace':confirmation?'Reenviar confirmación':'Entrar al panel';
     root.innerHTML=`<div class="login-wrap"><div class="login-art"><span class="brand">Beauty Day</span><div><span class="eyebrow">ESPACIO PRIVADO</span><h1>Tu espacio para cuidar cada detalle.</h1></div><p>Gestiona contenido, catálogo, equipo y fotografías desde aquí.</p></div><div class="login-panel"><form class="login-card" id="login-form"><span class="eyebrow">ADMINISTRACIÓN</span><h2>${title}</h2><p>${description}</p><label class="field">Correo electrónico<input type="email" name="email" value="${esc(email)}" required autocomplete="email" maxlength="254"></label>${recover||confirmation?'':'<label class="field">Contraseña<input type="password" name="password" required autocomplete="'+(signup?'new-password':'current-password')+'" '+(signup?'minlength="12"':'')+'></label>'}<button class="btn full" type="submit">${action}</button><p class="login-message ${success?'notice':'error'}" role="${success?'status':'alert'}">${esc(message)}</p><div class="login-options">${mode==='login'?'<button type="button" data-login-mode="signup">Crear mi acceso</button><button type="button" data-login-mode="recover">Olvidé mi contraseña</button><button type="button" data-login-mode="confirmation">Confirmar mi correo</button>':'<button type="button" data-login-mode="login">Volver al inicio de sesión</button>'}</div></form></div></div>`;
     document.querySelectorAll('[data-login-mode]').forEach(button=>button.addEventListener('click',()=>login('',button.dataset.loginMode,document.querySelector('#login-form').elements.email.value.trim())));
@@ -51,7 +52,7 @@
     });
   }
   function passwordRecovery(){root.innerHTML=`<div class="login-panel"><form class="login-card" id="recovery-form"><span class="eyebrow">RECUPERACIÓN</span><h2>Elige una nueva contraseña.</h2><label class="field">Nueva contraseña<input name="password" type="password" minlength="12" required autocomplete="new-password"></label><label class="field">Repite la contraseña<input name="confirmation" type="password" minlength="12" required autocomplete="new-password"></label><button class="btn" type="submit">Guardar contraseña</button><p id="recovery-status" role="status"></p></form></div>`;document.querySelector('#recovery-form').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,message=document.querySelector('#recovery-status'),button=form.querySelector('button');if(form.elements.password.value!==form.elements.confirmation.value){message.textContent='Las contraseñas no coinciden.';return;}button.disabled=true;try{await backend.changePassword(form.elements.password.value);await load();}catch(error){message.textContent=error.message;}finally{button.disabled=false;}});}
-  async function load(){root.innerHTML='<p class="loading">Abriendo el contenido…</p>';try{const result=await backend.panelSession();if(!['admin','support'].includes(result.role))throw Error('Tu cuenta no tiene acceso al equipo de Beauty Day.');panelRole=result.role;data=result.content;sha=result.revision;pricesConfigured=result.pricesConfigured;dirty=false;tab='home';editor();}catch(err){panelRole='';login(err.message);}}
+  async function load(){const epoch=sessionEpoch;root.innerHTML='<p class="loading">Abriendo el contenido…</p>';try{const result=await backend.panelSession();if(epoch!==sessionEpoch)return;if(!['admin','support'].includes(result.role))throw Error('Tu cuenta no tiene acceso al equipo de Beauty Day.');panelRole=result.role;data=result.content;sha=result.revision;pricesConfigured=result.pricesConfigured;dirty=false;tab='home';editor();}catch(err){if(epoch===sessionEpoch){panelRole='';login(err.message);}}}
   function field(path,label,type='text',extra='') {
     const value=get(path);let input;
     if(type==='textarea')input=`<textarea data-path="${esc(path)}" maxlength="${path.startsWith('brand.')?300:1200}">${esc(value)}</textarea>`;
@@ -134,7 +135,7 @@
   function categories(){return '<section class="panel"><div class="panel-head"><div><h2>Las áreas de tu salón</h2><p>El nombre se actualiza también en sus servicios y profesionales.</p></div><button class="btn subtle" id="add-category" type="button">+ Agregar categoría</button></div>'+data.categories.map((name,i)=>'<div class="category-editor"><span class="category-number">'+String(i+1).padStart(2,'0')+'</span><label class="field">Nombre de la categoría<input data-category-name="'+i+'" value="'+esc(name)+'" maxlength="60" required></label><span class="category-count">'+data.services.filter(s=>s.category===name).length+' servicios</span><button class="text-button danger-text" data-remove-category="'+i+'" type="button" aria-label="Eliminar categoría '+esc(name)+'">Eliminar</button></div>').join('')+'</section>';}
   function administrators(){return '<div class="settings-grid"><section class="panel"><h2>Invita a tu equipo</h2><p>Autoriza su correo y elige lo que podrá hacer. Esa persona crea su cuenta y confirma su correo.</p><form id="admin-email-form"><label class="field">Correo de la persona<input name="email" type="email" required maxlength="254" placeholder="nombre@correo.com"></label><label class="field">Permisos<select name="role"><option value="support">Atención por WhatsApp</option><option value="admin">Administración completa</option></select></label><p class="role-explanation">Atención por WhatsApp permite habilitar precios y retirar sus propios enlaces. Administración completa permite editar contenido, tarifas, fotografías y permisos del equipo.</p><button class="btn" type="submit">Autorizar correo y rol</button><p id="admin-email-status" role="status"></p></form></section><section class="panel"><h2>Personas autorizadas</h2><div id="admin-email-list">Cargando…</div><p class="fine">Cada persona usa su propia contraseña. Tu propio acceso de administración permanece activo.</p></section></div>';}
   async function refreshAdministrators(){
-    try{const list=await backend.admins(),el=document.querySelector('#admin-email-list');if(!el)return;
+    const epoch=sessionEpoch;try{const list=await backend.admins(),el=document.querySelector('#admin-email-list');if(!el||epoch!==sessionEpoch)return;
       el.innerHTML=list.map(a=>'<div class="admin-email-row"><div><strong>'+esc(a.email)+'</strong><span class="badge '+(a.active?'':'neutral')+'">'+(a.active?'Activo':'Desactivado')+'</span><small>'+roleName(a.role)+'</small></div><div class="member-actions"><label class="sr-only" for="member-role-'+esc(a.email)+'">Rol de '+esc(a.email)+'</label><select id="member-role-'+esc(a.email)+'" data-member-role="'+esc(a.email)+'"><option value="support" '+(a.role==='support'?'selected':'')+'>Atención por WhatsApp</option><option value="admin" '+(a.role!=='support'?'selected':'')+'>Administración completa</option></select><button class="text-button" data-save-member="'+esc(a.email)+'" data-member-active="'+a.active+'">Guardar rol</button><button class="text-button" data-admin-email="'+esc(a.email)+'" data-admin-active="'+(!a.active)+'" data-admin-role="'+(a.role||'admin')+'">'+(a.active?'Desactivar':'Activar')+'</button></div></div>').join('');
       document.querySelectorAll('[data-admin-email]').forEach(b=>b.addEventListener('click',async()=>{b.disabled=true;try{await backend.manageMember(b.dataset.adminEmail,b.dataset.adminActive==='true',b.dataset.adminRole);await refreshAdministrators();}catch(err){document.querySelector('#admin-email-status').textContent=err.message;}finally{b.disabled=false;}}));
       document.querySelectorAll('[data-save-member]').forEach(b=>b.addEventListener('click',async()=>{const selector=[...document.querySelectorAll('[data-member-role]')].find(input=>input.dataset.memberRole===b.dataset.saveMember);b.disabled=true;try{await backend.manageMember(b.dataset.saveMember,b.dataset.memberActive==='true',selector.value);await refreshAdministrators();document.querySelector('#admin-email-status').textContent='Permisos actualizados.';}catch(err){document.querySelector('#admin-email-status').textContent=err.message;}finally{b.disabled=false;}}));
@@ -147,6 +148,7 @@
   }
   const roleName=role=>role==='support'?'Atención por WhatsApp':'Administración completa';
   function editor(){
+    if(!data||!['admin','support'].includes(panelRole))return;
     const allowed=panelRole==='admin'?Object.keys(sections):['home','access'];
     if(!allowed.includes(tab))tab='home';
     const [eyebrow,title,description]=sections[tab];
@@ -203,10 +205,10 @@
     });
   }
   async function commitEntry(next,dialog,singular){
-    if(panelRole!=='admin')return;
+    if(panelRole!=='admin')return;const epoch=sessionEpoch;
     dialogBusy=true;document.querySelectorAll('#entry-dialog input,#entry-dialog textarea,#entry-dialog select,.dialog-footer button').forEach(b=>b.disabled=true);document.querySelector('#dialog-status').textContent='Guardando '+singular+'…';
-    try{const result=await backend.saveContent(next,sha);data=next;sha=result.revision;pricesConfigured=result.pricesConfigured;dirty=false;dialog.close();editor();status('Guardado. El cambio ya aparece en tu web.');}
-    catch(err){document.querySelector('#dialog-status').textContent=err.message;}
+    try{const result=await backend.saveContent(next,sha);if(epoch!==sessionEpoch)return;data=next;sha=result.revision;pricesConfigured=result.pricesConfigured;dirty=false;dialog.close();editor();status('Guardado. El cambio ya aparece en tu web.');}
+    catch(err){if(epoch===sessionEpoch&&document.querySelector('#dialog-status'))document.querySelector('#dialog-status').textContent=err.message;}
     finally{dialogBusy=false;document.querySelectorAll('#entry-dialog input,#entry-dialog textarea,#entry-dialog select,.dialog-footer button').forEach(b=>b.disabled=false);}
   }
   function bindRowButtons(){document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEntry(b.dataset.edit,Number(b.dataset.index))));}
@@ -218,7 +220,7 @@
     document.querySelector('#service-search')?.addEventListener('input',e=>{serviceSearch=e.currentTarget.value;document.querySelector('#services-list').innerHTML=serviceRows();bindRowButtons();});
     document.querySelector('#service-category')?.addEventListener('change',e=>{serviceCategory=e.currentTarget.value;document.querySelector('#services-list').innerHTML=serviceRows();bindRowButtons();});
     document.querySelectorAll('[data-save]').forEach(b=>b.addEventListener('click',save));
-    document.querySelector('#logout').addEventListener('click',async()=>{if(dirty&&!confirm('Hay cambios sin publicar. ¿Cerrar la sesión y descartarlos?'))return;try{await backend.signOut();data=null;panelRole='';dirty=false;lastGrant=null;login();}catch(err){status(err.message,true);}});
+    document.querySelector('#logout').addEventListener('click',async()=>{if(dirty&&!confirm('Hay cambios sin publicar. ¿Cerrar la sesión y descartarlos?'))return;clearPanel();try{await backend.signOut();}catch(err){login(err.message);}});
     document.querySelectorAll('[data-path]').forEach(el=>el.addEventListener('input',()=>set(el.dataset.path,el.type==='checkbox'?el.checked:el.type==='number'?(el.value===''?null:Number(el.value)):el.value)));
     document.querySelectorAll('[data-upload]').forEach(el=>el.addEventListener('change',async()=>{let file=el.files[0];if(!file)return;el.disabled=true;status('Preparando la fotografía…');try{file=await preparePhoto(file);const result=await backend.upload(file);set(el.dataset.upload,result.path);if(el.dataset.upload==='brand.heroImage')set('brand.heroImageIsReference',false);editor();status('Fotografía lista. Publica el cambio para mostrarla en tu web.');}catch(err){status(err.message,true);el.disabled=false;}}));
     document.querySelector('#add-category')?.addEventListener('click',()=>{if(data.categories.length>=12){status('Puedes crear hasta 12 categorías.',true);return;}let name='Nueva categoría',i=2;while(data.categories.some(c=>c.toLocaleLowerCase('es')===name.toLocaleLowerCase('es')))name='Nueva categoría '+i++;data.categories.push(name);dirty=true;editor();});
@@ -248,15 +250,16 @@
   }
   async function save(){
     if(panelRole!=='admin'||!dirty||busy)return;const formInputs=[...document.querySelectorAll('[data-path]')];if(formInputs.some(el=>!el.reportValidity()))return;
-    busy=true;status('Publicando los cambios…');
+    const epoch=sessionEpoch;busy=true;status('Publicando los cambios…');
     document.querySelectorAll('.editor button,.editor input,.editor textarea,.editor select').forEach(el=>el.disabled=true);
-    try{const result=await backend.saveContent(data,sha);sha=result.revision;pricesConfigured=result.pricesConfigured;dirty=false;busy=false;editor();status('Publicado. Los cambios ya aparecen en tu web.');}
-    catch(err){busy=false;editor();status(err.message,true);}finally{busy=false;}
+    try{const result=await backend.saveContent(data,sha);if(epoch!==sessionEpoch)return;sha=result.revision;pricesConfigured=result.pricesConfigured;dirty=false;busy=false;editor();status('Publicado. Los cambios ya aparecen en tu web.');}
+    catch(err){if(epoch===sessionEpoch){busy=false;editor();status(err.message,true);}}finally{busy=false;}
   }
 
   window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
   let recovering=false;
-  backend.onAuthChange(event=>{if(event==='SIGNED_OUT'&&data){data=null;panelRole='';dirty=false;lastGrant=null;login('La sesión se cerró. Vuelve a ingresar para continuar.');return;}if(event==='PASSWORD_RECOVERY'){recovering=true;setTimeout(passwordRecovery,0);}});
+  backend.onSessionEnd?.(message=>clearPanel(message));
+  backend.onAuthChange(event=>{if(event==='SIGNED_OUT'){clearPanel();return;}if(event==='PASSWORD_RECOVERY'){recovering=true;setTimeout(passwordRecovery,0);}});
   if(!backend.configured)login('Falta conectar la base de datos de Beauty Day.');
-  else backend.session().then(session=>{if(recovering)return;if(session){load();}else login();}).catch(error=>login(error.message));
+  else {const bootEpoch=sessionEpoch;backend.session().then(session=>{if(recovering||bootEpoch!==sessionEpoch)return;if(session){load();}else login();}).catch(error=>{if(bootEpoch===sessionEpoch)login(error.message);});}
 })();

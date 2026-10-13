@@ -5,8 +5,8 @@ import vm from 'node:vm';
 import content from '../docs/content/site.json' with {type:'json'};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
-async function panel(role='admin'){
- let markup='',modal='',fail=false,draftInputs=[],saved=[],issued=[];
+async function panel(role='admin',{delayLoad=false}={}){
+ let markup='',modal='',fail=false,draftInputs=[],saved=[],issued=[],onSessionEnd,onAuthChange,finishLoad,finishSave,delaySave=false;
  const nodes=new Map(),queryLists=new Map();
  const node=key=>{
   if(!nodes.has(key))nodes.set(key,{textContent:'',value:'',hidden:false,disabled:false,handlers:{},elements:{},dataset:{},focus(){},select(){},showModal(){this.open=true;},close(){this.open=false;},scrollIntoView(){},reportValidity(){return true;},addEventListener(name,fn){this.handlers[name]=fn;},querySelector:()=>node('button'),reset(){for(const input of Object.values(this.elements)){input.checked=false;input.value='';}},get innerHTML(){return key==='#admin-root'?markup:key==='#modal-slot'?modal:this.html||'';},set innerHTML(value){if(key==='#admin-root'){markup=value;modal='';}else if(key==='#modal-slot')modal=value;else this.html=value;}});
@@ -22,14 +22,14 @@ async function panel(role='admin'){
  };
  const document={querySelector:query,querySelectorAll:selector=>selector==='[data-draft]'?draftInputs:queryLists.get(selector)||[],activeElement:{focus(){}}};
  const privateContent=structuredClone(content);privateContent.services[0].price=20000;
- const backend={configured:true,onAuthChange(){},session:async()=>({user:{}}),panelSession:async()=>({role,content:privateContent,revision:'rev1',pricesConfigured:true}),saveContent:async(next,revision)=>{saved.push({next:structuredClone(next),revision});if(fail)throw Error('Otra persona guardó. Recarga para continuar.');return {revision:'rev2',pricesConfigured:true};},issueCode:async checks=>{issued.push(checks);return {code:'01234567-89ab-cdef-0123-456789abcdef',expiresAt:Date.now()+86400000};},signOut:async()=>{}};
+ const backend={configured:true,onAuthChange(fn){onAuthChange=fn;},onSessionEnd(fn){onSessionEnd=fn;},session:async()=>({user:{}}),panelSession:async()=>delayLoad?new Promise(resolve=>finishLoad=()=>resolve({role,content:privateContent,revision:'rev1',pricesConfigured:true})):({role,content:privateContent,revision:'rev1',pricesConfigured:true}),saveContent:async(next,revision)=>{saved.push({next:structuredClone(next),revision});if(fail)throw Error('Otra persona guardó. Recarga para continuar.');if(delaySave)return new Promise(resolve=>finishSave=()=>resolve({revision:'rev2',pricesConfigured:true}));return {revision:'rev2',pricesConfigured:true};},issueCode:async checks=>{issued.push(checks);return {code:'01234567-89ab-cdef-0123-456789abcdef',expiresAt:Date.now()+86400000};},signOut:async()=>{onAuthChange('SIGNED_OUT');}};
  const window={BeautyData:backend,addEventListener(){},matchMedia:()=>({matches:true})};
  const context={window,document,location:{href:'https://salon.test/Beauty-Day/admin/'},navigator:{clipboard:{writeText:async()=>{}}},URL,URLSearchParams,structuredClone,Intl,Date,Number,String,Array,Object,Math,crypto:{randomUUID:()=> 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'},confirm:()=>true,setTimeout(){}};
  vm.runInNewContext(readFileSync(new URL('../docs/assets/js/media.js',import.meta.url),'utf8'),context);
  vm.runInNewContext(readFileSync(new URL('../docs/assets/js/access-link.js',import.meta.url),'utf8'),context);
  const source=readFileSync(new URL('../docs/admin/admin.js',import.meta.url),'utf8').replace(/\}\)\(\);\s*$/,`window.review={select(key){tab=key;editor();},openEntry,state:()=>({data,sha,dirty})};})();`);
  vm.runInNewContext(source,context);await tick();
- return {window,node,saved,issued,html:()=>markup,modal:()=>modal,fail(value){fail=value;},inputs(value){draftInputs=value;},queryList(selector,list){queryLists.set(selector,list);}};
+ return {window,node,saved,issued,html:()=>markup,modal:()=>modal,fail(value){fail=value;},inputs(value){draftInputs=value;},queryList(selector,list){queryLists.set(selector,list);},expire(){onSessionEnd('La sesión terminó por seguridad.');},finishLoad:()=>finishLoad(),deferSave(){delaySave=true;},finishSave:()=>finishSave()};
 }
 test('el editor conserva el contenido tras un error y guarda con la revisión actual al reintentar',async()=>{
  const p=await panel();p.window.review.select('services');
@@ -116,4 +116,20 @@ test('el filtro del panel distingue la categoría Todos de todas las categorías
  assert.equal((p.node('#services-list').innerHTML.match(/class="service-name"/g)||[]).length,expected);
  p.node('#service-category').value='';p.node('#service-category').handlers.change({currentTarget:p.node('#service-category')});
  assert.equal((p.node('#services-list').innerHTML.match(/class="service-name"/g)||[]).length,data.services.length);
+});
+
+test('una lectura pendiente no vuelve a mostrar el editor tras cerrar la sesión',async()=>{
+ const p=await panel('admin',{delayLoad:true});assert.match(p.html(),/Abriendo el contenido/);
+ p.expire();assert.match(p.html(),/login-form/);p.finishLoad();await tick();
+ assert.match(p.html(),/login-form/);assert.doesNotMatch(p.html(),/class="editor"|Tarifa privada|Habilitar precios/);
+ assert.equal(p.window.review.state().data,null);
+});
+
+test('un guardado pendiente se descarta al vencer la sesión y se limpia el borrador privado',async()=>{
+ const p=await panel();p.window.review.select('services');p.window.review.openEntry('services',0);
+ p.inputs([{dataset:{draft:'name'},type:'text',value:'Edición privada de prueba'}]);p.deferSave();
+ const pending=p.node('#entry-form').handlers.submit({preventDefault(){},currentTarget:p.node('#entry-form')});
+ p.expire();p.finishSave();await pending;
+ assert.match(p.html(),/login-form/);assert.equal(p.modal(),'');assert.equal(p.window.review.state().data,null);
+ assert.equal(p.window.review.state().dirty,false);assert.doesNotMatch(p.html(),/Edición privada|20[.,]000/);
 });
