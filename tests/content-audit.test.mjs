@@ -4,8 +4,9 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import content from '../docs/content/site.json' with {type:'json'};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-async function page(data){
+async function page(data,{booking}={}){
  const nodes=new Map(),listeners={},saved=new Map([['bd_storage_notice','1']]);
+ if(booking)saved.set('beautyDayBooking',JSON.stringify(booking));
  const node=key=>{if(!nodes.has(key))nodes.set(key,{innerHTML:'',textContent:'',value:'',disabled:false,handlers:{},classList:{add(){},remove(){},toggle(){}},setAttribute(){},addEventListener(event,fn){this.handlers[event]=fn;}});return nodes.get(key);};
  const buttons=data.services.map(s=>({...node('service:'+s.id),dataset:{service:s.id},classList:{toggle(){}},addEventListener(event,fn){this.handlers[event]=fn;}}));
  const document={querySelector:s=>s==='#featured-rail'?null:node(s),querySelectorAll:s=>s==='[data-service]'&&node('#main').innerHTML.includes('data-service=')?buttons:[],body:{append(){}}};
@@ -73,5 +74,57 @@ test('texto con HTML no ejecuta código ni crea etiquetas en tarjetas o formular
  data.services[0].name=attack;data.promotions[0].title=attack;data.promotions[0].description='<script>alert(1)</script>';data.gifts[0].title=attack;
  const p=await page(data);for(const route of ['#/servicios','#/servicio/s01','#/promociones','#/bonos','#/reserva/1']){
   p.navigate(route);assert.doesNotMatch(p.html(),/<script>|<img src=x/);assert.match(p.html(),/&lt;img/);
+ }
+});
+
+test('reservar desde un perfil descarta un servicio anterior incompatible y conserva la profesional',async()=>{
+ const data=structuredClone(content),professional=data.professionals[0];
+ const incompatible=data.services.find(s=>!professional.categories.includes(s.category));
+ const compatible=data.services.find(s=>professional.categories.includes(s.category));
+ assert.ok(incompatible&&compatible);
+ const p=await page(data,{booking:{service:incompatible.id,professional:'any'}});
+ p.navigate('#/reserva/1?p='+professional.id);
+ const selected=JSON.parse(p.saved.get('beautyDayBooking'));
+ assert.equal(selected.service,'');assert.equal(selected.professional,professional.id);
+ p.buttons.find(b=>b.dataset.service===compatible.id).handlers.click();
+ assert.equal(JSON.parse(p.saved.get('beautyDayBooking')).professional,professional.id);
+ p.navigate('#/reserva/2');assert.ok(p.html().includes('data-professional="'+professional.id+'"'));
+});
+
+test('los enlaces de categorías antiguas vuelven al catálogo y permiten buscar',async()=>{
+ const p=await page(structuredClone(content));
+ p.navigate('#/servicios?c=Categor%C3%ADa%20que%20ya%20no%20existe');
+ assert.equal((p.html().match(/class="service-card"/g)||[]).length,content.services.length);
+ p.node('#catalog-search').value='semi';p.node('#search-form').handlers.submit({preventDefault(){}});
+ const query=new URLSearchParams(p.location.hash.split('?')[1]);
+ assert.equal(query.has('c'),false);assert.equal(query.get('q'),'semi');
+});
+
+test('una categoría llamada Todos se filtra sin confundirse con el catálogo completo',async()=>{
+ const data=structuredClone(content),old=data.categories[0];data.categories[0]='Todos';
+ data.services.forEach(s=>{if(s.category===old)s.category='Todos';});
+ const expected=data.services.filter(s=>s.category==='Todos').length;
+ const p=await page(data);
+ p.navigate('#/servicios?c=Todos');
+ assert.equal((p.html().match(/class="service-card"/g)||[]).length,expected);
+ assert.match(p.html(),/href="#\/servicios\?c=Todos">Todos<\/a>/);
+ p.navigate('#/servicios');
+ assert.equal((p.html().match(/class="service-card"/g)||[]).length,data.services.length);
+ assert.match(p.html(),/Todos los servicios/);
+});
+
+test('el inicio oculta el carrusel cuando no hay servicios destacados',async()=>{
+ const data=structuredClone(content);data.services.forEach(s=>s.featured=false);
+ const p=await page(data);
+ assert.doesNotMatch(p.html(),/featured-rail|Servicio anterior|Servicio siguiente/);
+ assert.match(p.html(),/category-grid/);assert.match(p.html(),/gift-preview/);
+});
+
+test('los correos editables se muestran y no inyectan parámetros en los enlaces',async()=>{
+ const data=structuredClone(content);data.contact.email='salon+contacto@example.test?bcc=otra@example.test';data.legal.privacyEmail='datos@example.test?subject=Prueba';
+ const p=await page(data);
+ for(const route of ['#/contacto','#/privacidad']){
+  p.navigate(route);const href=p.html().match(/href="(mailto:[^"]+)"/)[1];
+  assert.equal(new URL(href).search,'');assert.match(href,/%3F/);
  }
 });

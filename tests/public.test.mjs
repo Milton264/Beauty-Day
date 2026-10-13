@@ -70,7 +70,7 @@ test('el código habilita tarifas y una revocación vuelve a ocultarlas',async()
  assert.match(node('#main').innerHTML,/<details class="access-fallback" open>/);
 });
 
-async function openPrivateLink({reject=false,token='0123456789abcdef0123456789abcdef'}={}){
+async function openPrivateLink({reject=false,token='0123456789abcdef0123456789abcdef',prices=[{id:'s01',price:777,pricePrefix:''}]}={}){
  const nodes=new Map(),listeners={},saved=new Map([['bd_storage_notice','1']]);
  const node=key=>{if(!nodes.has(key))nodes.set(key,{innerHTML:'',textContent:'',disabled:false,isConnected:true,classList:{add(){},remove(){},toggle(){}},setAttribute(){},addEventListener(){}});return nodes.get(key);};
  const document={hidden:false,querySelector:s=>s==='#featured-rail'?null:node(s),querySelectorAll:()=>[],body:{append(){}}};
@@ -78,7 +78,7 @@ async function openPrivateLink({reject=false,token='0123456789abcdef0123456789ab
  const location={pathname:'/Beauty-Day/',search:'',hash:'#/servicios?acceso='+token};
  const replaced=[],calls=[];
  const history={replaceState(_state,_unused,url){replaced.push(url);location.hash=new URL(url,'https://salon.test').hash;}};
- const window={BeautyData:{content:async()=>content,prices:async code=>{calls.push(code);if(reject)throw Error('El código es inválido o venció.');return {expiresAt:Date.now()+60000,prices:[{id:'s01',price:777,pricePrefix:''}]};}},addEventListener:(event,fn)=>listeners[event]=fn,scrollTo(){},matchMedia:()=>({matches:true})};
+ const window={BeautyData:{content:async()=>content,prices:async code=>{calls.push(code);if(reject)throw Error('El código es inválido o venció.');return {expiresAt:Date.now()+60000,prices};}},addEventListener:(event,fn)=>listeners[event]=fn,scrollTo(){},matchMedia:()=>({matches:true})};
  const context={window,document,location,history,sessionStorage:storage,localStorage:storage,URL,URLSearchParams,Date,Number,String,Array,Math,encodeURIComponent,setTimeout(){return 1;},clearTimeout(){},setInterval(){}};
  for(const script of ['media.js','access-link.js','app.js'])vm.runInNewContext(readFileSync(new URL('../docs/assets/js/'+script,import.meta.url),'utf8'),context);
  await new Promise(resolve=>setImmediate(resolve));
@@ -95,4 +95,11 @@ test('un enlace vencido o incompleto conserva los precios ocultos y explica cóm
  assert.match(revoked.main,/Este acceso venció o fue retirado/);assert.doesNotMatch(revoked.main,/777 COP/);assert.equal(revoked.saved.has('bd_price_code'),false);
  const malformed=await openPrivateLink({token:'incompleto'});
  assert.equal(malformed.calls.length,0);assert.match(malformed.main,/código completo/);assert.equal(malformed.location.hash,'#/precios');
+});
+
+test('el texto antes del precio queda separado y las tarifas pendientes no muestran un importe inventado',async()=>{
+ const prefix=await openPrivateLink({prices:[{id:'s01',price:777,pricePrefix:'Desde'}]});
+ assert.match(prefix.main,/Desde 777 COP/);assert.doesNotMatch(prefix.main,/Desde777/);
+ const unknown=await openPrivateLink({prices:[{id:'s01',price:null,pricePrefix:'Desde'}]});
+ assert.match(unknown.main,/Consultar precio/);assert.doesNotMatch(unknown.main,/Desde Consultar/);
 });

@@ -1,6 +1,6 @@
 # Beauty Day: revisión de funciones y permisos
 
-Código preparado y base de datos actualizada el 12 de octubre de 2026. Se confirmó acceso a BeautyDay (`eibjseobuvzukpojgnjf`) y al proyecto Beauty Day (`vkydsmoiizksoppqerbd`) de la cuenta de Outlook. La base pública conserva la revisión 4, con 45 servicios, 5 categorías, 4 profesionales, 2 promociones, 3 bonos y 5 combos. La publicación del cliente actualizado en Cloudflare sigue pendiente.
+Versión 4.1.1 preparada el 13 de octubre de 2026 (UTC), con la base de datos actualizada el 12 de octubre de 2026. Se confirmó acceso a BeautyDay (`eibjseobuvzukpojgnjf`) y al proyecto Beauty Day (`vkydsmoiizksoppqerbd`) de la cuenta de Outlook. La base pública conserva la revisión 4, con 45 servicios, 5 categorías, 4 profesionales, 2 promociones, 3 bonos y 5 combos. La publicación del cliente actualizado en Cloudflare sigue pendiente.
 
 ## Correcciones incluidas
 
@@ -9,16 +9,16 @@ Código preparado y base de datos actualizada el 12 de octubre de 2026. Se confi
 | Fotografía principal | Foto grande junto al título del inicio | Se conserva la imagen completa dentro de un marco. |
 | Fotografía de detalle | Foto pequeña que acompaña la portada | Marco y dimensiones limitadas. |
 | Fotografía de presentación | Inicio, sección «Más que una cita», debajo de la galería de trabajos | El panel explica su ubicación y tiene un enlace directo a la sección. |
-| Servicios y tarifas | Catálogo, detalle del servicio y reserva | Se prueban los 45 detalles. Las tarifas siguen bloqueadas para visitantes sin acceso válido. |
-| Destacados | Carrusel del inicio | Se conserva la selección y la navegación. |
-| Categorías | Tarjetas del inicio, filtros del catálogo y reserva | Cuadrícula adaptable y texto largo con saltos; el filtro admite varias filas. Máximo 12 categorías. |
-| Profesionales | Equipo, perfiles individuales y reserva | Se prueban todos los perfiles. Reservar desde un perfil conserva a la profesional al elegir un servicio compatible. |
+| Servicios y tarifas | Catálogo, detalle del servicio y reserva | Se prueban los 45 detalles. Las tarifas siguen bloqueadas para visitantes sin acceso válido. El prefijo «Desde» se separa del importe; una tarifa pendiente muestra «Consultar precio». |
+| Destacados | Carrusel del inicio | Se conserva la selección y la navegación; el carrusel se oculta si no hay destacados. |
+| Categorías | Tarjetas del inicio, filtros del catálogo y reserva | Cuadrícula adaptable y texto largo con saltos; el filtro admite varias filas. Máximo 12 categorías. Renombrarlas conserva las referencias y el filtro; se evitan duplicados sin distinguir mayúsculas. Una categoría llamada «Todos» tiene su propio filtro. |
+| Profesionales | Equipo, perfiles individuales y reserva | Se prueban todos los perfiles. Reservar desde un perfil conserva a la profesional al elegir un servicio compatible, aunque exista una reserva anterior con un servicio incompatible. Las fotos mantienen su marco y se muestran completas. |
 | Promociones | Inicio y página Promociones | La web ahora utiliza la foto guardada. Las promociones inactivas siguen ocultas. |
 | Bonos | Página Bonos y nueva selección en el inicio | Se aclara la consulta, compra, entrega y uso por WhatsApp. Se añade fotografía opcional. |
 | Combos | Sección Combos dentro de Bonos | Se añade fotografía opcional y disposición adaptable. |
 | Contacto y redes | Contacto, requisitos de acceso y solicitudes | Contacto ahora muestra Instagram, TikTok y Facebook. |
 | Descubre tu ritual | Inicio y páginas de sugerencias | Si se renombra una categoría, la sugerencia vuelve al catálogo en lugar de mostrar una categoría inexistente. |
-| Buscar servicios | Catálogo | Buscar conserva la categoría seleccionada. |
+| Buscar servicios | Catálogo | Buscar conserva la categoría seleccionada y descarta filtros de categorías eliminadas. |
 | Privacidad | Privacidad, Cookies y Condiciones | Se corrige la referencia del alojamiento a Cloudflare. |
 | Habilitar precios | Panel del equipo → enlace privado de la clienta | Se mantienen las cuatro comprobaciones, vencimiento de 24 horas, revocación y códigos almacenados como hash. |
 | Equipo y permisos | Panel administrativo | Dos roles diferenciados, comprobados en la base de datos. |
@@ -44,7 +44,7 @@ Las fotografías siguen disponibles por su URL pública. El listado de archivos 
 
 ## Pruebas ejecutadas
 
-- `npm test`: 20 pruebas automatizadas aprobadas, incluidas verificaciones transaccionales en Postgres/PGlite. Los scripts SQL verifican múltiples permisos dentro de una sola prueba.
+- `npm test`: 29 pruebas automatizadas aprobadas, incluidas verificaciones transaccionales en Postgres/PGlite. Los scripts SQL verifican múltiples permisos dentro de una sola prueba.
 - Instalación del esquema, carga pública y ejecución de la actualización dos veces: conservan el documento, las revisiones y los permisos.
 - Acceso anónimo, cuenta común, cuenta no confirmada, administración y atención. Atención no puede editar, invitar, consultar el directorio del equipo, leer códigos almacenados ni subir o eliminar fotos.
 - Enlaces válidos, incompletos, vencidos y revocados; cuatro requisitos obligatorios; límite de lectura y máximo de 60 emisiones por persona en una hora. La emisión se serializa por persona.
@@ -52,7 +52,8 @@ Las fotografías siguen disponibles por su URL pública. El listado de archivos 
 - Fotografías de promociones, bonos y combos presentes en el HTML público. Imágenes locales y del bucket de Supabase permitidas; SVG, HTML, protocolos ejecutables, credenciales en URL, otros dominios y rutas con `..` rechazados.
 - Los 45 detalles de servicios, los 4 perfiles, las rutas de contacto, bonos, promociones, búsqueda, privacidad y reservas se generan correctamente.
 - Escenario de 12 categorías, 100 servicios, 30 profesionales, 30 promociones, 30 bonos y 30 combos, con nombres largos. También se prueba contenido vacío y texto que contiene HTML.
-- Compilación del cliente de Supabase y comprobación de sintaxis de los scripts.
+- Regresiones de reservas anteriores, renombrado y duplicados de categorías, categoría «Todos», filtros antiguos, carrusel sin destacados, prefijos de precios y enlaces de correo sin parámetros inyectados.
+- Compilación del cliente de Supabase, comprobación de sintaxis de los scripts y análisis sintáctico de las hojas CSS.
 - Auditoría de dependencias de producción: cero vulnerabilidades conocidas en la comprobación realizada.
 - Las dos migraciones del 12 de octubre se aplicaron en el proyecto real, con PostgreSQL 17.11. Se ejecutaron `03_verify.sql` y `04_verify_roles.sql` y ambas finalizaron correctamente con ROLLBACK.
 - La prueba de borrado acepta el rechazo adicional de `storage.protect_delete()` sin desactivar esa protección. Solo utiliza metadatos temporales que se revierten; el borrado de archivos reales debe hacerse por la API de Storage.
@@ -81,13 +82,13 @@ El asesor de seguridad mostró cero errores. Se corrigió la advertencia «Publi
 
 La configuración de Auth todavía apuntaba a `http://localhost:3000` y no tenía retornos autorizados. Se guardó `https://soybeautyday.shop/admin/` como Site URL y como retorno exacto autorizado, sin comodines.
 
-SMTP propio está desactivado. Supabase usa su servicio incluido, que limita los destinatarios a integrantes de la organización y no garantiza entrega para producción. Antes de dar acceso al personal del cliente se necesita configurar un proveedor SMTP y comprobar confirmación y recuperación. La [guía oficial de SMTP](https://supabase.com/docs/guides/auth/auth-smtp) describe el requisito. La confirmación de correo se conserva.
+Por indicación del usuario, el correo y SMTP se dejan como están; no se crearon buzones ni se modificó el alojamiento. SMTP propio está desactivado. Supabase usa su servicio incluido, que limita los destinatarios a integrantes de la organización y no garantiza entrega para producción. Antes de dar acceso al personal del cliente se necesita configurar un proveedor SMTP y comprobar confirmación y recuperación. La [guía oficial de SMTP](https://supabase.com/docs/guides/auth/auth-smtp) describe el requisito. La confirmación de correo se conserva.
 
 ## Pendientes de verificación real
 
 La base de Outlook ya está actualizada y verificada. La versión nueva del cliente todavía no está publicada en el dominio: el usuario indicó que él realizará la carga del ZIP en Cloudflare.
 
-La revisión visual a distintos anchos y la subida real de nuevas fotos deben terminarse después de publicar el ZIP. Los escenarios de contenido máximo prueban generación y comportamiento; no equivalen a una comprobación visual en dispositivos reales. La entrega real de correos de confirmación y recuperación sigue pendiente de SMTP.
+La revisión visual a distintos anchos y la subida real de nuevas fotos deben terminarse después de publicar el ZIP. Los escenarios de contenido máximo prueban generación y comportamiento; no equivalen a una comprobación visual en dispositivos reales. La entrega real de correos de confirmación y recuperación no se ha comprobado. La configuración de SMTP queda aplazada por indicación del usuario.
 
 El comando de historial local de Supabase no pudo conectarse porque no hay una instancia local de Supabase en el puerto 54322. La actualización sí se ejecutó y comprobó mediante Postgres/PGlite. Las siguientes invocaciones de la herramienta se hicieron con telemetría desactivada.
 
@@ -96,7 +97,7 @@ El comando de historial local de Supabase no pudo conectarse porque no hay una i
 1. Ya completado: `supabase/migrations/20261012182006_beauty_roles_validation.sql` y `supabase/migrations/20261012223152_beauty_storage_listing.sql` en el proyecto de Outlook. Conservan catálogo, tarifas, fotos y personas autorizadas.
 2. Ya completado: `database/03_verify.sql` y `database/04_verify_roles.sql` en el proyecto real. Ambas terminaron con `rollback` y no conservaron usuarios ni cambios de prueba.
 3. Publicar únicamente el contenido de `docs/` en el Worker de archivos estáticos de Cloudflare mediante el ZIP actualizado. No subir SQL, tests ni código de desarrollo a la carpeta pública.
-4. Comprobar en vivo cada sección, guardar una foto temporal y restaurar el contenido anterior, probar una cuenta de atención y retirar el enlace de prueba. Configurar y probar SMTP antes de las altas del personal del cliente.
+4. Comprobar en vivo cada sección, guardar una foto temporal y restaurar el contenido anterior, probar una cuenta de atención y retirar el enlace de prueba. El usuario dejó la configuración de correo fuera de esta actualización; la confirmación y recuperación para nuevas cuentas no se presentan como verificadas.
 
 Para una instalación nueva, ejecutar primero `database/01_schema.sql` y `database/02_public_seed.sql`, y después los archivos SQL de `supabase/migrations/` en orden. No volver a ejecutar los archivos de creación o carga inicial sobre la base de producción.
 

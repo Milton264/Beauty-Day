@@ -38,4 +38,4 @@ El panel organiza las tareas en Inicio, Servicios y tarifas y Habilitar precios.
 
 ## Actualización: funciones y rol de WhatsApp
 
-Consulta [AUDITORIA_BEAUTY_DAY.md](AUDITORIA_BEAUTY_DAY.md) para las correcciones, la matriz de permisos, las pruebas y el orden de instalación. Antes de publicar el cliente 4.1, aplica la actualización SQL de `supabase/migrations/`. Nunca vuelvas a cargar el contenido inicial en una base de producción existente.
+Consulta [AUDITORIA_BEAUTY_DAY.md](AUDITORIA_BEAUTY_DAY.md) para las correcciones, la matriz de permisos, las pruebas y el orden de instalación. La versión 4.1.1 incluye las correcciones finales de reservas, filtros e imágenes. Las migraciones de `supabase/migrations/` ya se aplicaron y verificaron en el proyecto de Outlook de Beauty Day; no es necesario repetirlas para publicar este ZIP. En otra instalación, aplica las migraciones antes de publicar el cliente. Nunca vuelvas a cargar el contenido inicial en una base de producción existente.
